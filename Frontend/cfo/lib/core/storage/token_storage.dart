@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/app_constants.dart';
+import 'dart:convert';
 
 class TokenStorage {
   Future<void> saveToken(String token) async {
@@ -30,7 +31,7 @@ class TokenStorage {
 
   Future<void> saveUserData(Map<String, dynamic> user) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(AppConstants.userKey, user.toString());
+    await prefs.setString(AppConstants.userKey, jsonEncode(user));
     if (user.containsKey('role')) {
       await prefs.setString(AppConstants.roleKey, user['role']);
     }

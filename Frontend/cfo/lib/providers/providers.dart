@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 import '../core/network/api_client.dart';
+import '../core/constants/api_constants.dart';
 import '../core/storage/token_storage.dart';
 import '../services/auth_service.dart';
 import '../services/dashboard_service.dart';
@@ -10,15 +12,29 @@ import '../services/marketplace_service.dart';
 import '../services/fundraising_service.dart';
 import '../services/notifications_service.dart';
 import '../services/profile_service.dart';
-import '../models/user.dart';
 import '../models/dashboard_metrics.dart';
 import '../models/financial_data.dart';
-import '../models/transaction_model.dart';
-import '../models/notification_model.dart';
 import '../models/advisor_model.dart';
 import '../models/chat_message.dart';
 import '../models/forecast_result.dart';
 import '../models/report_data.dart';
+
+// --- Backend Availability ---
+// Pings /health on startup and every 30s. All services check this before calling API.
+final backendAvailableProvider = StateProvider<bool>((ref) => false);
+
+class BackendChecker {
+  static Future<bool> check() async {
+    try {
+      final uri = Uri.parse(
+          '${ApiConstants.baseUrl.replaceAll('/api', '')}/api/health');
+      final response = await http.get(uri).timeout(const Duration(seconds: 3));
+      return response.statusCode == 200;
+    } catch (_) {
+      return false;
+    }
+  }
+}
 
 // --- Token Storage (singleton) ---
 final tokenStorageProvider = Provider<TokenStorage>((ref) => TokenStorage());
@@ -30,16 +46,41 @@ final apiClientProvider = Provider<ApiClient>((ref) {
 
 // --- Services ---
 final authServiceProvider = Provider<AuthService>((ref) {
-  return AuthService(ref.read(apiClientProvider), ref.read(tokenStorageProvider));
+  return AuthService(
+      ref.read(apiClientProvider), ref.read(tokenStorageProvider));
 });
-final dashboardServiceProvider = Provider<DashboardService>((ref) => DashboardService(ref.read(apiClientProvider)));
-final forecastServiceProvider = Provider<ForecastService>((ref) => ForecastService(ref.read(apiClientProvider)));
-final aiServiceProvider = Provider<AiService>((ref) => AiService(ref.read(apiClientProvider)));
-final reportsServiceProvider = Provider<ReportsService>((ref) => ReportsService(ref.read(apiClientProvider)));
-final marketplaceServiceProvider = Provider<MarketplaceService>((ref) => MarketplaceService(ref.read(apiClientProvider)));
-final fundraisingServiceProvider = Provider<FundraisingService>((ref) => FundraisingService(ref.read(apiClientProvider)));
-final notificationsServiceProvider = Provider<NotificationsService>((ref) => NotificationsService(ref.read(apiClientProvider)));
-final profileServiceProvider = Provider<ProfileService>((ref) => ProfileService(ref.read(apiClientProvider)));
+final dashboardServiceProvider = Provider<DashboardService>((ref) {
+  final useMock = !ref.watch(backendAvailableProvider);
+  return DashboardService(ref.read(apiClientProvider), useMock: useMock);
+});
+final forecastServiceProvider = Provider<ForecastService>((ref) {
+  final useMock = !ref.watch(backendAvailableProvider);
+  return ForecastService(ref.read(apiClientProvider), useMock: useMock);
+});
+final aiServiceProvider = Provider<AiService>((ref) {
+  final useMock = !ref.watch(backendAvailableProvider);
+  return AiService(ref.read(apiClientProvider), useMock: useMock);
+});
+final reportsServiceProvider = Provider<ReportsService>((ref) {
+  final useMock = !ref.watch(backendAvailableProvider);
+  return ReportsService(ref.read(apiClientProvider), useMock: useMock);
+});
+final marketplaceServiceProvider = Provider<MarketplaceService>((ref) {
+  final useMock = !ref.watch(backendAvailableProvider);
+  return MarketplaceService(ref.read(apiClientProvider), useMock: useMock);
+});
+final fundraisingServiceProvider = Provider<FundraisingService>((ref) {
+  final useMock = !ref.watch(backendAvailableProvider);
+  return FundraisingService(ref.read(apiClientProvider), useMock: useMock);
+});
+final notificationsServiceProvider = Provider<NotificationsService>((ref) {
+  final useMock = !ref.watch(backendAvailableProvider);
+  return NotificationsService(ref.read(apiClientProvider), useMock: useMock);
+});
+final profileServiceProvider = Provider<ProfileService>((ref) {
+  final useMock = !ref.watch(backendAvailableProvider);
+  return ProfileService(ref.read(apiClientProvider), useMock: useMock);
+});
 
 // --- Auth State ---
 class AuthState {
@@ -51,9 +92,23 @@ class AuthState {
   final String? email;
   final bool isLoading;
 
-  AuthState({this.isLoggedIn = false, this.token, this.role = 'founder', this.userId, this.name, this.email, this.isLoading = false});
+  AuthState(
+      {this.isLoggedIn = false,
+      this.token,
+      this.role = 'founder',
+      this.userId,
+      this.name,
+      this.email,
+      this.isLoading = false});
 
-  AuthState copyWith({bool? isLoggedIn, String? token, String? role, String? userId, String? name, String? email, bool? isLoading}) {
+  AuthState copyWith(
+      {bool? isLoggedIn,
+      String? token,
+      String? role,
+      String? userId,
+      String? name,
+      String? email,
+      bool? isLoading}) {
     return AuthState(
       isLoggedIn: isLoggedIn ?? this.isLoggedIn,
       token: token ?? this.token,
@@ -83,7 +138,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final data = await _authService.login(email, password);
       final user = data['user'];
-      state = AuthState(isLoggedIn: true, token: data['token'], role: user['role'] ?? 'founder', userId: user['id'], name: user['name'], email: user['email']);
+      state = AuthState(
+          isLoggedIn: true,
+          token: data['token'],
+          role: user['role'] ?? 'founder',
+          userId: user['id'],
+          name: user['name'],
+          email: user['email']);
       return null;
     } catch (e) {
       state = state.copyWith(isLoading: false);
@@ -91,12 +152,19 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  Future<String?> signup(String name, String email, String password, String role) async {
+  Future<String?> signup(
+      String name, String email, String password, String role) async {
     state = state.copyWith(isLoading: true);
     try {
       final data = await _authService.signup(name, email, password, role);
       final user = data['user'];
-      state = AuthState(isLoggedIn: true, token: data['token'], role: user['role'] ?? role, userId: user['id'], name: user['name'], email: user['email']);
+      state = AuthState(
+          isLoggedIn: true,
+          token: data['token'],
+          role: user['role'] ?? role,
+          userId: user['id'],
+          name: user['name'],
+          email: user['email']);
       return null;
     } catch (e) {
       state = state.copyWith(isLoading: false);
@@ -107,6 +175,24 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> logout() async {
     await _authService.logout();
     state = AuthState();
+  }
+
+  // FIXED BUG-003: demo login routes through Riverpod, not static variable
+  Future<void> demoLogin({
+    required String name,
+    required String email,
+    required String role,
+  }) async {
+    await Future.delayed(const Duration(milliseconds: 600));
+    await _authService.tokenStorage.saveRole(role);
+    state = AuthState(
+      isLoggedIn: true,
+      token: 'demo-token',
+      role: role,
+      userId: 'demo-user-001',
+      name: name,
+      email: email,
+    );
   }
 
   void setRole(String role) {
@@ -129,7 +215,8 @@ final dashboardMetricsProvider = FutureProvider<DashboardMetrics?>((ref) async {
   }
 });
 
-final dashboardTrendsProvider = FutureProvider<List<FinancialData>>((ref) async {
+final dashboardTrendsProvider =
+    FutureProvider<List<FinancialData>>((ref) async {
   final isLoggedIn = ref.watch(authProvider).isLoggedIn;
   if (!isLoggedIn) return [];
   try {
@@ -139,7 +226,8 @@ final dashboardTrendsProvider = FutureProvider<List<FinancialData>>((ref) async 
   }
 });
 
-final dashboardActivityProvider = FutureProvider<Map<String, dynamic>>((ref) async {
+final dashboardActivityProvider =
+    FutureProvider<Map<String, dynamic>>((ref) async {
   final isLoggedIn = ref.watch(authProvider).isLoggedIn;
   if (!isLoggedIn) return {};
   try {
@@ -150,7 +238,8 @@ final dashboardActivityProvider = FutureProvider<Map<String, dynamic>>((ref) asy
 });
 
 // --- Forecast State ---
-final forecastProvider = StateNotifierProvider<ForecastNotifier, AsyncValue<ForecastResult?>>((ref) {
+final forecastProvider =
+    StateNotifierProvider<ForecastNotifier, AsyncValue<ForecastResult?>>((ref) {
   return ForecastNotifier(ref.read(forecastServiceProvider));
 });
 
@@ -158,10 +247,18 @@ class ForecastNotifier extends StateNotifier<AsyncValue<ForecastResult?>> {
   final ForecastService _service;
   ForecastNotifier(this._service) : super(const AsyncValue.data(null));
 
-  Future<void> load({int months = 12, double revenueGrowth = 5, double expenseGrowth = 3, double hiringCost = 0}) async {
+  Future<void> load(
+      {int months = 12,
+      double revenueGrowth = 5,
+      double expenseGrowth = 3,
+      double hiringCost = 0}) async {
     state = const AsyncValue.loading();
     try {
-      final result = await _service.getProjection(months: months, revenueGrowth: revenueGrowth, expenseGrowth: expenseGrowth, hiringCost: hiringCost);
+      final result = await _service.getProjection(
+          months: months,
+          revenueGrowth: revenueGrowth,
+          expenseGrowth: expenseGrowth,
+          hiringCost: hiringCost);
       state = AsyncValue.data(result);
     } catch (e, st) {
       state = AsyncValue.error(e, st);
@@ -170,7 +267,8 @@ class ForecastNotifier extends StateNotifier<AsyncValue<ForecastResult?>> {
 }
 
 // --- AI Chat State ---
-final aiChatProvider = StateNotifierProvider<AiChatNotifier, List<ChatMessage>>((ref) {
+final aiChatProvider =
+    StateNotifierProvider<AiChatNotifier, List<ChatMessage>>((ref) {
   return AiChatNotifier(ref.read(aiServiceProvider));
 });
 
@@ -189,7 +287,10 @@ class AiChatNotifier extends StateNotifier<List<ChatMessage>> {
     state = [...state, ChatMessage(role: 'user', content: message)];
     try {
       final result = await _service.chat(message);
-      state = [...state, ChatMessage(role: 'assistant', content: result['response'])];
+      state = [
+        ...state,
+        ChatMessage(role: 'assistant', content: result['response'])
+      ];
       return List<String>.from(result['suggestedQuestions'] ?? []);
     } catch (e) {
       state = [...state, ChatMessage(role: 'assistant', content: 'Error: $e')];
@@ -199,11 +300,13 @@ class AiChatNotifier extends StateNotifier<List<ChatMessage>> {
 }
 
 // --- Notifications State ---
-final notificationsProvider = StateNotifierProvider<NotificationsNotifier, AsyncValue<Map<String, dynamic>>>((ref) {
+final notificationsProvider = StateNotifierProvider<NotificationsNotifier,
+    AsyncValue<Map<String, dynamic>>>((ref) {
   return NotificationsNotifier(ref.read(notificationsServiceProvider));
 });
 
-class NotificationsNotifier extends StateNotifier<AsyncValue<Map<String, dynamic>>> {
+class NotificationsNotifier
+    extends StateNotifier<AsyncValue<Map<String, dynamic>>> {
   final NotificationsService _service;
   NotificationsNotifier(this._service) : super(const AsyncValue.loading());
 
@@ -233,7 +336,8 @@ final advisorsProvider = FutureProvider<List<AdvisorModel>>((ref) async {
 });
 
 // --- Fundraising ---
-final fundraisingReadinessProvider = FutureProvider<FundraisingReadiness?>((ref) async {
+final fundraisingReadinessProvider =
+    FutureProvider<FundraisingReadiness?>((ref) async {
   try {
     return await ref.read(fundraisingServiceProvider).getReadiness();
   } catch (_) {
