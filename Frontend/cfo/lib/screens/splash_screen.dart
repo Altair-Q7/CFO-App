@@ -20,14 +20,15 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   Future<void> _initApp() async {
-    // Check backend availability before navigating
+    // Check backend once, update state
     final available = await BackendChecker.check();
+    if (!mounted) return;
     ref.read(backendAvailableProvider.notifier).state = available;
 
-    // Start background monitoring
-    await BackendMonitor.start(ref);
+    // Start background monitor using container, not ref
+    // ProviderScope.containerOf gives us the container safely
+    BackendMonitor.start(ProviderScope.containerOf(context));
 
-    // Navigate after delay
     if (!mounted) return;
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {

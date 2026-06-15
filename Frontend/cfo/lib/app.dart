@@ -23,18 +23,23 @@ import 'screens/marketplace/booking_screen.dart';
 import 'screens/fundraising/readiness_screen.dart';
 import 'screens/fundraising/data_room_screen.dart';
 import 'screens/notifications/notifications_screen.dart';
+import 'screens/settings/settings_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/profile/edit_profile_screen.dart';
+import 'providers/providers.dart';
 
 class CfoApp extends ConsumerWidget {
   const CfoApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeProvider);
     return MaterialApp(
       title: 'The Scalable CFO',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeMode,
       initialRoute: '/',
       routes: {
         '/': (ctx) => const SplashScreen(),
@@ -61,6 +66,7 @@ class CfoApp extends ConsumerWidget {
         '/notifications': (ctx) => const NotificationsScreen(),
         '/profile': (ctx) => const ProfileScreen(),
         '/profile/edit': (ctx) => const EditProfileScreen(),
+        '/settings': (ctx) => const SettingsScreen(),
       },
     );
   }

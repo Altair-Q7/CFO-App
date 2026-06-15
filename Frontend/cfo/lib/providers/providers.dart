@@ -1,7 +1,10 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../core/network/api_client.dart';
 import '../core/constants/api_constants.dart';
+import '../core/constants/app_constants.dart';
 import '../core/storage/token_storage.dart';
 import '../services/auth_service.dart';
 import '../services/dashboard_service.dart';
@@ -22,19 +25,6 @@ import '../models/report_data.dart';
 // --- Backend Availability ---
 // Pings /health on startup and every 30s. All services check this before calling API.
 final backendAvailableProvider = StateProvider<bool>((ref) => false);
-
-class BackendChecker {
-  static Future<bool> check() async {
-    try {
-      final uri = Uri.parse(
-          '${ApiConstants.baseUrl.replaceAll('/api', '')}/api/health');
-      final response = await http.get(uri).timeout(const Duration(seconds: 3));
-      return response.statusCode == 200;
-    } catch (_) {
-      return false;
-    }
-  }
-}
 
 // --- Token Storage (singleton) ---
 final tokenStorageProvider = Provider<TokenStorage>((ref) => TokenStorage());
@@ -360,4 +350,32 @@ final profileProvider = FutureProvider<Map<String, dynamic>>((ref) async {
   } catch (_) {
     return {};
   }
+});
+
+// --- Theme ---
+class ThemeNotifier extends StateNotifier<ThemeMode> {
+  ThemeNotifier() : super(ThemeMode.system) {
+    _loadTheme();
+  }
+
+  Future<void> _loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final stored = prefs.getString(AppConstants.themeModeKey);
+    if (stored != null) {
+      state = ThemeMode.values.firstWhere(
+        (e) => e.name == stored,
+        orElse: () => ThemeMode.system,
+      );
+    }
+  }
+
+  Future<void> setTheme(ThemeMode mode) async {
+    state = mode;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(AppConstants.themeModeKey, mode.name);
+  }
+}
+
+final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeMode>((ref) {
+  return ThemeNotifier();
 });

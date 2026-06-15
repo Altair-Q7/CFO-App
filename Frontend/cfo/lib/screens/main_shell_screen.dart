@@ -47,10 +47,10 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.surfaceColor(context),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.08),
+              color: Colors.black.withValues(alpha: 0.08),
               blurRadius: 20,
               offset: const Offset(0, -5),
             ),
@@ -77,9 +77,11 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
-                      color: isSelected
-                          ? AppTheme.primary.withOpacity(0.1)
-                          : Colors.transparent,
+                    color: isSelected
+                                ? (Theme.of(context).brightness == Brightness.dark
+                                    ? AppTheme.gold.withValues(alpha: 0.15)
+                                    : AppTheme.primary.withValues(alpha: 0.1))
+                                : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -89,7 +91,7 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
                           tab['icon'] as IconData,
                           size: 22,
                           color:
-                              isSelected ? AppTheme.primary : AppTheme.textHint,
+                              isSelected ? AppTheme.iconOnSurface(context) : AppTheme.onSurfaceTextSecondary(context),
                         ),
                         const SizedBox(height: 3),
                         Text(
@@ -100,8 +102,8 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
                                 ? FontWeight.w600
                                 : FontWeight.normal,
                             color: isSelected
-                                ? AppTheme.primary
-                                : AppTheme.textHint,
+                                ? AppTheme.iconOnSurface(context)
+                                : AppTheme.onSurfaceTextSecondary(context),
                           ),
                         ),
                       ],
@@ -228,8 +230,16 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
             Icons.person_rounded,
             'Profile',
             'Account & company info',
-            AppTheme.primary,
+            AppTheme.iconOnSurface(context),
             () => Navigator.pushNamed(context, '/profile'),
+          ),
+          const SizedBox(height: 4),
+          _menuCard(
+            Icons.settings_rounded,
+            'Settings',
+            'Preferences & app config',
+            AppTheme.onSurfaceTextSecondary(context),
+            () => Navigator.pushNamed(context, '/settings'),
           ),
         ],
       ),
@@ -238,14 +248,17 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
 
   Widget _menuCard(IconData icon, String title, String subtitle, Color color,
       VoidCallback onTap) {
+    final surface = AppTheme.surfaceColor(context);
+    final border = AppTheme.borderColor(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: surface,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: border, width: 0.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -265,7 +278,7 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: color.withOpacity(0.1),
+                    color: color.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(icon, color: color, size: 22),
@@ -276,22 +289,22 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(title,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: AppTheme.textPrimary,
+                            color: AppTheme.onSurfaceText(context),
                           )),
                       const SizedBox(height: 2),
                       Text(subtitle,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: AppTheme.textSecondary,
+                            color: AppTheme.onSurfaceTextSecondary(context),
                           )),
                     ],
                   ),
                 ),
                 Icon(Icons.arrow_forward_ios,
-                    size: 14, color: AppTheme.textHint),
+                    size: 14, color: AppTheme.onSurfaceTextSecondary(context)),
               ],
             ),
           ),

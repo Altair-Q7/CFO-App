@@ -44,11 +44,11 @@ class _ForecastScreenState extends State<ForecastScreen> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppTheme.surfaceColor(context),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 10,
                     offset: const Offset(0, 3),
                   ),
@@ -155,11 +155,11 @@ class _ForecastScreenState extends State<ForecastScreen> {
               height: 250,
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppTheme.surfaceColor(context),
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
+                    color: Colors.black.withValues(alpha: 0.04),
                     blurRadius: 10,
                     offset: const Offset(0, 3),
                   ),
@@ -187,19 +187,29 @@ class _ForecastScreenState extends State<ForecastScreen> {
                     fontSize: 13, color: AppTheme.textSecondary)),
             Text(
               '${suffix == r'$/mo' ? '\$${value.toStringAsFixed(0)}' : value.toStringAsFixed(1)}$suffix',
-              style: const TextStyle(
+              style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: AppTheme.primary),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppTheme.gold
+                      : AppTheme.primary),
             ),
           ],
         ),
         SliderTheme(
           data: SliderThemeData(
-            activeTrackColor: AppTheme.primary,
-            inactiveTrackColor: AppTheme.primary.withOpacity(0.1),
-            thumbColor: AppTheme.primary,
-            overlayColor: AppTheme.primary.withOpacity(0.1),
+            activeTrackColor: Theme.of(context).brightness == Brightness.dark
+                ? AppTheme.gold
+                : AppTheme.primary,
+            inactiveTrackColor: (Theme.of(context).brightness == Brightness.dark
+                ? AppTheme.gold
+                : AppTheme.primary).withValues(alpha: 0.1),
+            thumbColor: Theme.of(context).brightness == Brightness.dark
+                ? AppTheme.gold
+                : AppTheme.primary,
+            overlayColor: (Theme.of(context).brightness == Brightness.dark
+                ? AppTheme.gold
+                : AppTheme.primary).withValues(alpha: 0.1),
             trackHeight: 4,
           ),
           child: Slider(
@@ -220,11 +230,11 @@ class _ForecastScreenState extends State<ForecastScreen> {
         margin: const EdgeInsets.only(right: 8),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.surfaceColor(context),
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),

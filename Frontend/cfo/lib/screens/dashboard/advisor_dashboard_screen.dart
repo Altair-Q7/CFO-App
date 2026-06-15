@@ -15,7 +15,7 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
     final data = MockDataService().getMockAdvisorMetrics();
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
+      backgroundColor: AppTheme.baseColor(context),
       appBar: AppBar(
         title: Text(data['advisorName'] ?? 'Advisor'),
         actions: [
@@ -75,13 +75,18 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
   Widget _buildSectionTitle(String title, IconData icon) {
     return Row(
       children: [
-        Icon(icon, size: 18, color: AppTheme.primary),
+        Icon(icon, size: 18,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? AppTheme.gold
+                : AppTheme.primary),
         const SizedBox(width: 8),
         Text(title,
-            style: const TextStyle(
+            style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary)),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.textOnDark
+                    : AppTheme.textPrimary)),
       ],
     );
   }
@@ -141,14 +146,7 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
           'Active Clients',
           '${data['activeEngagements']}',
           Icons.people_rounded,
-          AppTheme.primary,
-        ),
-        const SizedBox(width: 10),
-        _kpiCard(
-          'Completed',
-          '${data['completedSessions']}',
-          Icons.check_circle_rounded,
-          AppTheme.success,
+          AppTheme.iconOnSurface(context),
         ),
         const SizedBox(width: 10),
         _kpiCard(
@@ -166,11 +164,12 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.surfaceColor(context),
           borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: AppTheme.borderColor(context), width: 0.5),
           boxShadow: [
             BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: Colors.black.withValues(alpha: 0.04),
                 blurRadius: 8,
                 offset: const Offset(0, 2))
           ],
@@ -181,7 +180,7 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10)),
               child: Icon(icon, color: color, size: 18),
             ),
@@ -191,8 +190,8 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
                     fontSize: 18, fontWeight: FontWeight.bold, color: color)),
             const SizedBox(height: 2),
             Text(label,
-                style: const TextStyle(
-                    fontSize: 11, color: AppTheme.textSecondary),
+                style: TextStyle(
+                    fontSize: 11, color: AppTheme.onSurfaceTextSecondary(context)),
                 textAlign: TextAlign.center),
           ],
         ),
@@ -208,11 +207,12 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
           margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppTheme.surfaceColor(context),
             borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppTheme.borderColor(context), width: 0.5),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 8,
                   offset: const Offset(0, 2)),
             ],
@@ -223,11 +223,11 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withOpacity(0.08),
+                  color: AppTheme.iconOnSurface(context).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.event_rounded,
-                    color: AppTheme.primary, size: 22),
+                child: Icon(Icons.event_rounded,
+                    color: AppTheme.iconOnSurface(context), size: 22),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -235,18 +235,18 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(b['client']!,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: AppTheme.textPrimary)),
+                            color: AppTheme.onSurfaceText(context))),
                     const SizedBox(height: 2),
                     Text('${b['date']} · ${b['time']}',
-                        style: const TextStyle(
-                            fontSize: 12, color: AppTheme.textSecondary)),
+                        style: TextStyle(
+                            fontSize: 12, color: AppTheme.onSurfaceTextSecondary(context))),
                     const SizedBox(height: 2),
                     Text('Topic: ${b['topic']}',
-                        style: const TextStyle(
-                            fontSize: 11, color: AppTheme.textHint)),
+                        style: TextStyle(
+                            fontSize: 11, color: AppTheme.onSurfaceTextSecondary(context))),
                   ],
                 ),
               ),
@@ -278,11 +278,12 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppTheme.surfaceColor(context),
             borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppTheme.borderColor(context), width: 0.5),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 8,
                   offset: const Offset(0, 2)),
             ],
@@ -312,14 +313,14 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(c['name']!,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: AppTheme.textPrimary)),
+                            color: AppTheme.onSurfaceText(context))),
                     const SizedBox(height: 2),
                     Text('$runway months runway',
-                        style: const TextStyle(
-                            fontSize: 11, color: AppTheme.textSecondary)),
+                        style: TextStyle(
+                            fontSize: 11, color: AppTheme.onSurfaceTextSecondary(context))),
                   ],
                 ),
               ),
@@ -351,11 +352,12 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
           margin: const EdgeInsets.only(bottom: 8),
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppTheme.surfaceColor(context),
             borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: AppTheme.borderColor(context), width: 0.5),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
+                  color: Colors.black.withValues(alpha: 0.04),
                   blurRadius: 8,
                   offset: const Offset(0, 2)),
             ],
@@ -378,14 +380,14 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(a['client']!,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
-                            color: AppTheme.textPrimary)),
+                            color: AppTheme.onSurfaceText(context))),
                     const SizedBox(height: 2),
                     Text('${a['action']} · ${a['daysAgo']} days ago',
-                        style: const TextStyle(
-                            fontSize: 11, color: AppTheme.textSecondary)),
+                        style: TextStyle(
+                            fontSize: 11, color: AppTheme.onSurfaceTextSecondary(context))),
                   ],
                 ),
               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../services/mock_data_service.dart';
+import '../../widgets/madi_presence_indicator.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -15,62 +16,39 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final data = MockDataService().getMockAdminMetrics();
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
+      backgroundColor: AppTheme.baseColor(context),
       appBar: AppBar(
-        title: const Text('Admin Platform'),
+        backgroundColor: AppTheme.navyDeep,
+        elevation: 0,
+        title: const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Operations Center', style: TextStyle(
+              color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700,
+            )),
+            Text('The Scalable CFO \u00B7 Admin', style: TextStyle(
+              color: AppTheme.textSecondary, fontSize: 11,
+            )),
+          ],
+        ),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 12),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: AppTheme.success.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 6,
-                  height: 6,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: AppTheme.success,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                const Text('Live',
-                    style: TextStyle(
-                        color: AppTheme.success,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600)),
-              ],
-            ),
-          ),
+          const MadiPresenceIndicator(),
+          const SizedBox(width: 12),
         ],
       ),
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: () async => setState(() {}),
           child: ListView(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.zero,
             children: [
+              _buildRevenueHeader(data),
               _buildKpiGrid(data),
-              const SizedBox(height: 16),
-              _buildGrowthHint(data),
-              const SizedBox(height: 20),
-              _buildAlerts(data),
-              const SizedBox(height: 20),
-              _buildPlanDistribution(data),
-              const SizedBox(height: 20),
-              _buildSectionTitle(
-                  'Advisor Pipeline', Icons.verified_user_rounded),
-              const SizedBox(height: 12),
+              _buildRevenueBreakdown(data),
               _buildAdvisorPipeline(data),
-              const SizedBox(height: 20),
-              _buildSectionTitle('Recent Signups', Icons.people_rounded),
-              const SizedBox(height: 12),
+              _buildAlerts(data),
               _buildRecentSignups(data),
-              const SizedBox(height: 20),
+              const SizedBox(height: 100),
             ],
           ),
         ),
@@ -78,255 +56,240 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, size: 18, color: AppTheme.primary),
-        const SizedBox(width: 8),
-        Text(title,
-            style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.textPrimary)),
-      ],
+  Widget _buildRevenueHeader(Map<String, dynamic> data) {
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: AppTheme.navyGradient,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('PLATFORM REVENUE', style: TextStyle(
+            fontSize: 11, fontWeight: FontWeight.w600,
+            letterSpacing: 1.2, color: AppTheme.textMuted,
+          )),
+          const SizedBox(height: 8),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                '₹${((data['platformRevenue'] as num) / 100000).toStringAsFixed(1)}L',
+                style: const TextStyle(
+                  fontSize: 40, fontWeight: FontWeight.w800,
+                  color: Colors.white, letterSpacing: -1,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8, left: 10),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: AppTheme.emerald.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    '+${data['platformRevenueChange']}%',
+                    style: const TextStyle(
+                      color: AppTheme.emerald,
+                      fontSize: 12, fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          const Text('Monthly Recurring Revenue', style: TextStyle(
+            fontSize: 12, color: AppTheme.textMuted,
+          )),
+        ],
+      ),
     );
   }
 
   Widget _buildKpiGrid(Map<String, dynamic> data) {
-    final revValue = data['platformRevenue'] as int;
     final items = <Map<String, dynamic>>[
       {
-        'label': 'Total Founders',
+        'label': 'TOTAL FOUNDERS',
         'value': '${data['totalFounders']}',
         'icon': Icons.people_rounded,
-        'color': AppTheme.primary,
+        'color': AppTheme.navyDeep,
         'subtitle': '${data['activeThisMonth']} active this month',
       },
       {
-        'label': 'Total Advisors',
+        'label': 'TOTAL ADVISORS',
         'value': '${data['totalAdvisors']}',
         'icon': Icons.verified_user_rounded,
-        'color': AppTheme.info,
+        'color': AppTheme.navyMid,
         'subtitle': '${data['totalBookings']} bookings',
       },
       {
-        'label': 'Platform Revenue',
-        'value': '₹${(revValue / 100000).toStringAsFixed(1)}L',
-        'icon': Icons.trending_up_rounded,
-        'color': AppTheme.success,
-        'subtitle': '+${data['platformRevenueChange']}% this month',
+        'label': 'BOOKINGS',
+        'value': '${data['totalBookings']}',
+        'icon': Icons.calendar_month_rounded,
+        'color': AppTheme.emerald,
+        'subtitle': '+${data['bookingsChange']}% this month',
       },
       {
-        'label': 'Avg Session',
-        'value': '${data['avgSessionMinutes']}m',
-        'icon': Icons.timer_rounded,
-        'color': AppTheme.warning,
-        'subtitle': 'Uptime ${data['uptime']}%',
+        'label': 'UPTIME',
+        'value': '${data['uptime']}%',
+        'icon': Icons.monitor_heart_rounded,
+        'color': AppTheme.amber,
+        'subtitle': 'Avg session ${data['avgSessionMinutes']}m',
       },
     ];
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 1.4,
-      ),
-      itemCount: items.length,
-      itemBuilder: (ctx, i) {
-        final item = items[i];
-        return Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2)),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: (item['color'] as Color).withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Icon(item['icon'] as IconData,
-                    color: item['color'] as Color, size: 16),
-              ),
-              const Spacer(),
-              Text(item['value']!,
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: item['color'] as Color)),
-              const SizedBox(height: 2),
-              Text(item['label']!,
-                  style: const TextStyle(
-                      fontSize: 12, color: AppTheme.textSecondary)),
-              const SizedBox(height: 1),
-              Text(item['subtitle']!,
-                  style:
-                      const TextStyle(fontSize: 10, color: AppTheme.textHint)),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildGrowthHint(Map<String, dynamic> data) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: AppTheme.success.withOpacity(0.06),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppTheme.success.withOpacity(0.15)),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.auto_graph_rounded, color: AppTheme.success, size: 18),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'Platform growing at +${data['platformRevenueChange']}% revenue this month — ${data['totalFounders']} total founders onboarded',
-              style:
-                  const TextStyle(fontSize: 12, color: AppTheme.textSecondary),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAlerts(Map<String, dynamic> data) {
-    final alerts = data['alerts'] as List;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildSectionTitle(
-            'Platform Alerts', Icons.notifications_active_rounded),
-        const SizedBox(height: 12),
-        ...alerts.map((a) {
-          Color color;
-          switch (a['type']) {
-            case 'warning':
-              color = AppTheme.warning;
-              break;
-            case 'success':
-              color = AppTheme.success;
-              break;
-            default:
-              color = AppTheme.info;
-          }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 1.6,
+        ),
+        itemCount: items.length,
+        itemBuilder: (ctx, i) {
+          final item = items[i];
+          final color = item['color'] as Color;
           return Container(
-            margin: const EdgeInsets.only(bottom: 8),
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.06),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color.withOpacity(0.15)),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  a['type'] == 'warning'
-                      ? Icons.warning_amber_rounded
-                      : a['type'] == 'success'
-                          ? Icons.check_circle_rounded
-                          : Icons.info_rounded,
-                  color: color,
-                  size: 18,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(a['message']!,
-                      style: TextStyle(fontSize: 12, color: color)),
+              color: AppTheme.surfaceColor(context),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppTheme.borderColor(context)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(item['label'] as String, style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.8,
+                      color: AppTheme.textMuted,
+                    )),
+                    Container(
+                      width: 28, height: 28,
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Icon(item['icon'] as IconData,
+                          color: color, size: 14),
+                    ),
+                  ],
+                ),
+                Text(item['value'] as String, style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.onSurfaceText(context),
+                )),
+                Text(item['subtitle'] as String, style: TextStyle(
+                  fontSize: 11,
+                  color: AppTheme.onSurfaceTextSecondary(context),
+                )),
+              ],
+            ),
           );
-        }),
-      ],
+        },
+      ),
     );
   }
 
-  Widget _buildPlanDistribution(Map<String, dynamic> data) {
-    final dist = data['planDistribution'] as Map<String, dynamic>;
+  Widget _buildRevenueBreakdown(Map<String, dynamic> data) {
+    final totalRevenue = data['platformRevenue'] as int;
+    final breakdown = [
+      {'label': 'SaaS MRR', 'value': totalRevenue * 0.65, 'color': AppTheme.navyDeep},
+      {'label': 'Marketplace GMV', 'value': totalRevenue * 0.22, 'color': AppTheme.emerald},
+      {'label': 'Enterprise', 'value': totalRevenue * 0.13, 'color': AppTheme.amber},
+    ];
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        color: AppTheme.surfaceColor(context),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.borderColor(context)),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2)),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildSectionTitle('Plan Distribution', Icons.subscriptions_rounded),
+          const Text('REVENUE BREAKDOWN', style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1.2,
+            color: AppTheme.textSecondary,
+          )),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              _planTile('Premium', '${dist['premium']}', AppTheme.accentGold),
-              const SizedBox(width: 12),
-              _planTile('Standard', '${dist['standard']}', AppTheme.primary),
-              const SizedBox(width: 12),
-              _planTile('Basic', '${dist['basic']}', AppTheme.textSecondary),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(6),
-            child: SizedBox(
-              height: 8,
-              child: Row(
+          ...breakdown.map((b) {
+            final label = b['label'] as String;
+            final value = b['value'] as double;
+            final color = b['color'] as Color;
+            final pct = (value / totalRevenue * 100).toStringAsFixed(0);
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Flexible(
-                    flex: dist['premium'] as int,
-                    child: Container(color: AppTheme.accentGold),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(label, style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: AppTheme.textPrimary,
+                      )),
+                      Text('\u20B9${(value / 100000).toStringAsFixed(1)}L',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textPrimary,
+                          )),
+                    ],
                   ),
-                  Flexible(
-                    flex: dist['standard'] as int,
-                    child: Container(color: AppTheme.primary),
+                  const SizedBox(height: 6),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: value / totalRevenue,
+                      backgroundColor: AppTheme.borderColor(context),
+                      valueColor: AlwaysStoppedAnimation<Color>(color),
+                      minHeight: 6,
+                    ),
                   ),
-                  Flexible(
-                    flex: dist['basic'] as int,
-                    child: Container(color: AppTheme.textSecondary),
-                  ),
+                  const SizedBox(height: 2),
+                  Text('$pct% of total', style: const TextStyle(
+                    fontSize: 10,
+                    color: AppTheme.textMuted,
+                  )),
                 ],
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _planTile(String label, String value, Color color) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(value,
-              style: TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold, color: color)),
-          const SizedBox(height: 2),
-          Text(label,
-              style:
-                  const TextStyle(fontSize: 11, color: AppTheme.textSecondary)),
+            );
+          }),
         ],
       ),
     );
@@ -334,169 +297,264 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Widget _buildAdvisorPipeline(Map<String, dynamic> data) {
     final advisors = data['advisorPipeline'] as List;
-    return Column(
-      children: advisors.map((a) {
-        Color statusColor;
-        switch (a['status']) {
-          case 'Verified':
-            statusColor = AppTheme.success;
-            break;
-          case 'Pending':
-            statusColor = AppTheme.warning;
-            break;
-          case 'Suspended':
-            statusColor = AppTheme.error;
-            break;
-          default:
-            statusColor = AppTheme.textHint;
-        }
-        return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2)),
-            ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: Text('ADVISOR PIPELINE', style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
+              color: AppTheme.textSecondary,
+            )),
           ),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppTheme.primary.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Icon(Icons.person_rounded,
-                    color: AppTheme.primary, size: 20),
+          ...advisors.map((a) {
+            Color statusColor;
+            switch (a['status']) {
+              case 'Verified':
+                statusColor = AppTheme.emerald;
+                break;
+              case 'Pending':
+                statusColor = AppTheme.amber;
+                break;
+              case 'Suspended':
+                statusColor = AppTheme.coral;
+                break;
+              default:
+                statusColor = AppTheme.textMuted;
+            }
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceColor(context),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppTheme.borderColor(context)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(a['name']!,
-                        style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.textPrimary)),
-                    const SizedBox(height: 2),
-                    Text('${a['clients']} clients · ★ ${a['rating']}',
-                        style: const TextStyle(
-                            fontSize: 11, color: AppTheme.textSecondary)),
-                  ],
-                ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40, height: 40,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppTheme.gold.withValues(alpha: 0.15)
+                          : AppTheme.navyDeep.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(Icons.person_rounded,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppTheme.gold
+                            : AppTheme.navyDeep, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(a['name'] as String, style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).brightness == Brightness.dark
+                              ? AppTheme.textOnDark
+                              : AppTheme.textPrimary,
+                        )),
+                        const SizedBox(height: 2),
+                        Text('${a['clients']} clients \u00B7 \u2605 ${a['rating']}',
+                            style: const TextStyle(
+                              fontSize: 11, color: AppTheme.textSecondary)),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(a['status'] as String,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: statusColor)),
+                  ),
+                ],
               ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(a['status']!,
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: statusColor)),
-              ),
-            ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAlerts(Map<String, dynamic> data) {
+    final alerts = data['alerts'] as List;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: Text('PLATFORM ALERTS', style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
+              color: AppTheme.textSecondary,
+            )),
           ),
-        );
-      }).toList(),
+          ...alerts.map((a) {
+            Color color;
+            IconData icon;
+            switch (a['type']) {
+              case 'warning':
+                color = AppTheme.amber;
+                icon = Icons.warning_amber_rounded;
+                break;
+              case 'success':
+                color = AppTheme.emerald;
+                icon = Icons.check_circle_rounded;
+                break;
+              default:
+                color = AppTheme.navyMid;
+                icon = Icons.info_rounded;
+            }
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: color.withValues(alpha: 0.15)),
+              ),
+              child: Row(
+                children: [
+                  Icon(icon, color: color, size: 18),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(a['message'] as String,
+                        style: TextStyle(fontSize: 12, color: color)),
+                  ),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
     );
   }
 
   Widget _buildRecentSignups(Map<String, dynamic> data) {
     final signups = data['recentSignups'] as List;
-    return Column(
-      children: signups.map((s) {
-        Color planColor;
-        switch (s['plan']) {
-          case 'Premium':
-          case 'Pro':
-            planColor = AppTheme.accentGold;
-            break;
-          case 'Standard':
-            planColor = AppTheme.primary;
-            break;
-          default:
-            planColor = AppTheme.textSecondary;
-        }
-        return Container(
-          margin: const EdgeInsets.only(bottom: 8),
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black.withOpacity(0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2)),
-            ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: Text('RECENT SIGNUPS', style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
+              color: AppTheme.textSecondary,
+            )),
           ),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: (s['role'] == 'advisor'
-                          ? AppTheme.info
-                          : AppTheme.success)
-                      .withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  s['role'] == 'advisor'
-                      ? Icons.verified_user_rounded
-                      : Icons.business_rounded,
-                  color:
-                      s['role'] == 'advisor' ? AppTheme.info : AppTheme.success,
-                  size: 20,
-                ),
+          ...signups.map((s) {
+            Color planColor;
+            switch (s['plan']) {
+              case 'Premium':
+              case 'Pro':
+                planColor = AppTheme.gold;
+                break;
+              case 'Standard':
+                planColor = AppTheme.navyDeep;
+                break;
+              default:
+                planColor = AppTheme.textSecondary;
+            }
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceColor(context),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppTheme.borderColor(context)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(s['name']!,
-                        style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.textPrimary)),
-                    const SizedBox(height: 2),
-                    Text(
-                        '${s['daysAgo']} day${s['daysAgo'] == 1 ? '' : 's'} ago',
-                        style: const TextStyle(
-                            fontSize: 11, color: AppTheme.textSecondary)),
-                  ],
-                ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40, height: 40,
+                    decoration: BoxDecoration(
+                      color: (s['role'] == 'advisor'
+                              ? AppTheme.navyMid
+                              : AppTheme.emerald)
+                          .withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      s['role'] == 'advisor'
+                          ? Icons.verified_user_rounded
+                          : Icons.business_rounded,
+                      color: s['role'] == 'advisor'
+                          ? AppTheme.navyMid
+                          : AppTheme.emerald,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(s['name'] as String, style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.textPrimary,
+                        )),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${s['daysAgo']} day${s['daysAgo'] == 1 ? '' : 's'} ago',
+                          style: const TextStyle(
+                            fontSize: 11, color: AppTheme.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: planColor.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(s['plan'] as String,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: planColor)),
+                  ),
+                ],
               ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: planColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(s['plan']!,
-                    style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: planColor)),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
+            );
+          }),
+        ],
+      ),
     );
   }
 }

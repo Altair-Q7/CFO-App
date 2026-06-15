@@ -335,20 +335,9 @@ class MockDataService {
     return {
       'advisor': advisor,
       'reviews': [
-        {
-          'rating': 5,
-          'comment':
-              'Exceptional financial insight. Transformed our fundraising strategy.',
-        },
-        {
-          'rating': 5,
-          'comment':
-              'Incredible depth of knowledge. Highly recommend for any startup.',
-        },
-        {
-          'rating': 4,
-          'comment': 'Practical advice that saved us months of runway.',
-        },
+        ReviewModel(id: 'rev-1', advisorId: id, rating: 5, comment: 'Exceptional financial insight. Transformed our fundraising strategy.'),
+        ReviewModel(id: 'rev-2', advisorId: id, rating: 5, comment: 'Incredible depth of knowledge. Highly recommend for any startup.'),
+        ReviewModel(id: 'rev-3', advisorId: id, rating: 4, comment: 'Practical advice that saved us months of runway.'),
       ],
     };
   }
@@ -432,6 +421,69 @@ class MockDataService {
 
   Map<String, dynamic> getMockProfile() {
     return {'user': mockUser, 'company': mockCompany};
+  }
+
+  Map<String, dynamic> getMadiBriefing() {
+    return {
+      'status': 'warning',
+      'healthStatus': 'warning',
+      'primaryRisk': 'Burn rate increased 8% last month — payroll is the primary driver.',
+      'recommendedAction': 'Review payroll projections before the next forecast cycle.',
+      'actionRoute': '/forecast',
+      'timestamp': 'Updated just now',
+      'sentences': [
+        'Runway remaining: 11 months.',
+        'Burn rate increased 8% last month — payroll is the primary driver.',
+        'Current cash position supports 2 additional hires, not 5.',
+        'Review payroll projections before the next forecast cycle.',
+      ],
+      'action': {
+        'label': 'Review Forecast',
+        'route': '/forecast',
+      },
+    };
+  }
+
+  Map<String, dynamic> getMadiBriefingHealthy() {
+    return {
+      'status': 'healthy',
+      'healthStatus': 'healthy',
+      'primaryRisk': 'No immediate risks identified.',
+      'recommendedAction': 'Schedule next forecast review in 14 days.',
+      'actionRoute': '/forecast',
+      'timestamp': 'Updated just now',
+      'sentences': [
+        'Runway remaining: 18 months at current burn.',
+        'Revenue grew 12% last month — ahead of the 8% target.',
+        'Operating margin is 34%, up from 28% in Q1.',
+        'No immediate risks identified — next forecast review due in 14 days.',
+      ],
+      'action': {
+        'label': 'View Forecast',
+        'route': '/forecast',
+      },
+    };
+  }
+
+  Map<String, dynamic> getMadiBriefingCritical() {
+    return {
+      'status': 'critical',
+      'healthStatus': 'critical',
+      'primaryRisk': 'Burn rate increased 22% over 60 days with no corresponding revenue growth.',
+      'recommendedAction': 'Initiate bridge financing conversations or reduce monthly burn by ₹3,00,000 within 30 days.',
+      'actionRoute': '/reports',
+      'timestamp': 'Updated just now',
+      'sentences': [
+        'Runway remaining: 4 months — immediate action required.',
+        'Burn rate increased 22% over 60 days with no corresponding revenue growth.',
+        'Current reserves do not support planned Q3 hiring.',
+        'Initiate bridge financing conversations or reduce monthly burn by ₹3,00,000 within 30 days.',
+      ],
+      'action': {
+        'label': 'Review Cash Flow',
+        'route': '/reports',
+      },
+    };
   }
 
   ReportData getMockReport(String type) {

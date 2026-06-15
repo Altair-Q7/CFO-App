@@ -93,13 +93,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.surfaceColor(context),
         borderRadius: BorderRadius.circular(14),
         border:
-            !n.read ? Border.all(color: AppTheme.info.withOpacity(0.2)) : null,
+            !n.read ? Border.all(color: AppTheme.info.withValues(alpha: 0.2)) : Border.all(color: AppTheme.borderColor(context), width: 0.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -113,8 +113,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             height: 42,
             decoration: BoxDecoration(
               color: n.read
-                  ? AppTheme.textHint.withOpacity(0.08)
-                  : _typeColor(n.type).withOpacity(0.1),
+                  ? AppTheme.textHint.withValues(alpha: 0.08)
+                  : _typeColor(n.type).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(

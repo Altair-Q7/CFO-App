@@ -4,23 +4,9 @@ import 'dart:async';
 import '../core/constants/api_constants.dart';
 import '../providers/providers.dart';
 
-// Periodically checks if backend is reachable.
-// Call BackendMonitor.start(ref) once from main() or splash screen.
-class BackendMonitor {
-  static Timer? _timer;
-
-  static Future<void> start(WidgetRef ref) async {
-    await _check(ref);
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 30), (_) => _check(ref));
-  }
-
-  static Future<void> _check(WidgetRef ref) async {
-    final available = await _ping();
-    ref.read(backendAvailableProvider.notifier).state = available;
-  }
-
-  static Future<bool> _ping() async {
+// Stateless ping — no ref held, safe to call from anywhere
+class BackendChecker {
+  static Future<bool> check() async {
     try {
       final uri = Uri.parse(
         '${ApiConstants.baseUrl.replaceAll('/api', '')}/api/health',
@@ -30,5 +16,28 @@ class BackendMonitor {
     } catch (_) {
       return false;
     }
+  }
+}
+
+// Uses a ProviderContainer — not tied to any widget lifecycle
+class BackendMonitor {
+  static Timer? _timer;
+  static ProviderContainer? _container;
+
+  static void start(ProviderContainer container) {
+    _container = container;
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 30), (_) => _check());
+  }
+
+  static void stop() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  static Future<void> _check() async {
+    if (_container == null) return;
+    final available = await BackendChecker.check();
+    _container!.read(backendAvailableProvider.notifier).state = available;
   }
 }
