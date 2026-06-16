@@ -74,6 +74,57 @@ flutter run -d 00069341O000692  → ✓ Installed and running on Nothing 2a (And
 
 ---
 
+### 16/06/2026 20:32 — Fix Launch Icon (Android + iOS)
+**Problem:** Both Android and iOS still showed default Flutter placeholder icons. The prior session logged icon generation but the actual mipmap PNGs were never replaced.
+
+**Root cause:** `flutter_launcher_icons` was never added as a dependency or run. The mipmap PNGs in `android/app/src/main/res/mipmap-*/` and most iOS icons were the default Flutter-generated generic white/purple icons.
+
+**Fix:**
+- Added `flutter_launcher_icons: ^0.14.3` to `dev_dependencies` in `pubspec.yaml`
+- Added `flutter_launcher_icons` config block with source `assets/images/logo.png`, `adaptive_icon_background: "#0B1F3A"` (navy deep)
+- Added `remove_alpha_ios: true` to avoid App Store rejection
+- Updated `ic_launcher_background.xml` from gray `#747779` to navy `#0B1F3A` to match adaptive icon
+- Ran `dart run flutter_launcher_icons` — regenerated all Android mipmap densities and all iOS AppIcon sizes
+
+**Files modified:**
+- `Frontend/cfo/pubspec.yaml` — Added dependency + config
+- `Frontend/cfo/android/app/src/main/res/drawable/ic_launcher_background.xml` — Color sync to navy
+
+---
+
+---
+
+### 16/06/2026 21:11 — Fix Launch Icons (Android + iOS)
+
+**Problem:** The app launcher icons showed default Flutter placeholders (white/purple generic icon) on both Android and iOS. Prior session logged icon generation but `flutter_launcher_icons` was never actually configured or run. Additionally, `assets/images/logo.png` is 96% transparent — compositing it directly would produce invisible icons.
+
+**Root cause:**
+- The MADI brand logo (`logo.png`) is a 1024×1024 RGBA image where ~96% of pixels are transparent — it's designed as a foreground asset for the adaptive icon system, not a standalone launcher icon
+- Using it directly with `flutter_launcher_icons` produced icons with only ~6% visible pixels (tiny logo mark floating on transparent field)
+
+**Fix:**
+| Step | Detail |
+|------|--------|
+| Composited source | Created `assets/images/icon_base.png` — logo composited onto navy `#0B1F3A` background using ImageMagick |
+| `pubspec.yaml` | Added `flutter_launcher_icons: ^0.14.3` to dev_dependencies with config: `image_path: icon_base.png` (solid), `adaptive_icon_foreground: logo.png` (transparent), `adaptive_icon_background: "#0B1F3A"`, `remove_alpha_ios: true` |
+| Android regular icons | Regenerated all 5 density mipmaps (`mdpi`→`xxxhdpi`) — now solid logo-on-navy |
+| Android round icons | Copied from regular icons to `ic_launcher_round.png` (flutter_launcher_icons doesn't generate these) |
+| Android adaptive icons | Updated `ic_launcher.xml` — uses `@color/ic_launcher_background` (navy) + foreground inset 16% from `@drawable/ic_launcher_foreground` |
+| iOS icons | Regenerated all sizes — now solid RGB (no alpha, App Store compliant) |
+| Background sync | Updated `ic_launcher_background.xml` from gray `#747779` to navy `#0B1F3A` |
+
+**Files changed:**
+- `Frontend/cfo/pubspec.yaml` — added `flutter_launcher_icons` dep + config
+- `Frontend/cfo/android/app/src/main/res/drawable/ic_launcher_background.xml` — gray → navy
+- `Frontend/cfo/assets/images/icon_base.png` — new file (composited source)
+
+**Verify:**
+```
+flutter analyze → No issues found!
+```
+
+---
+
 ### Earlier — Initial Project Setup
 - Initial commit: `014b715`
 - Checkpoint commit: `aff569a`
@@ -268,11 +319,9 @@ flutter build apk --release   → ✓ Built app-release.apk (54.6MB)
 - **AI Chat** (`chat_screen.dart`): Added `MadiLogo(size: 36)` in header, `MadiLogo(size: 72)` in empty state, gold-tinted filter icon on prompts
 - **Forecasting** (`forecast_screen.dart`): Added `MadiLogo(size: 32)` in MADI briefing card
 
-**Application Icon:**
-- Generated all Android launcher icons from Logo.png at all mipmap densities
-- Created adaptive icon with navy background + logo foreground (`mipmap-anydpi-v26/`)
-- Proper `ic_launcher.xml` referencing background drawable and foreground mipmap
-- Android manifest already references `@mipmap/ic_launcher`
+**Application Icon (incomplete — see 16/06 session below for actual fix):**
+- `flutter_launcher_icons` was NOT actually added or run in this session
+- Logo.png was copied to assets but the mipmap PNGs were never replaced (still default Flutter icons)
 
 **Theme Audit (all screens):**
 | File | Changes |
