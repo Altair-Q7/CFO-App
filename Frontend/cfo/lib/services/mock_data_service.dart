@@ -5,8 +5,6 @@ import '../models/notification_model.dart';
 import '../models/forecast_result.dart';
 import '../models/advisor_model.dart';
 import '../models/report_data.dart';
-import '../models/user.dart';
-import '../models/chat_message.dart';
 
 class MockDataService {
   // Singleton

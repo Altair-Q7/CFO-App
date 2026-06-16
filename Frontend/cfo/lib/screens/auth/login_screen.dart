@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../providers/providers.dart';
+import '../../widgets/madi_logo.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -113,7 +114,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   InputDecoration _inputDecoration(String label, IconData icon, {required bool isDark}) {
     final fillCol = isDark ? AppTheme.darkElevated : AppTheme.lightElevated;
     final borderCol = isDark ? AppTheme.darkBorder : AppTheme.lightBorder;
-    final labelCol = isDark ? AppTheme.textOnDarkMuted : AppTheme.textSecondary;
+    final labelCol = isDark ? AppTheme.textOnDarkMuted : AppTheme.onSurfaceTextSecondary(context);
     return InputDecoration(
       labelText: label,
       labelStyle: TextStyle(color: labelCol, fontSize: 14),
@@ -151,8 +152,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final bg = isDark ? AppTheme.darkBase : AppTheme.lightBase;
     final cardBg = isDark ? AppTheme.darkElevated : AppTheme.lightSurface;
-    final textPrimary = isDark ? AppTheme.textOnDark : AppTheme.textPrimary;
-    final textSecondary = isDark ? AppTheme.textOnDarkMuted : AppTheme.textSecondary;
+    final textPrimary = isDark ? AppTheme.textOnDark : AppTheme.onSurfaceText(context);
+    final textSecondary = isDark ? AppTheme.textOnDarkMuted : AppTheme.onSurfaceTextSecondary(context);
     final borderCol = isDark ? AppTheme.darkBorder : AppTheme.lightBorder;
 
     return Scaffold(
@@ -185,21 +186,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               Center(
                 child: Column(
                   children: [
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: AppTheme.navyMid,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const Center(
-                        child: Text('M', style: TextStyle(
-                          color: AppTheme.gold,
-                          fontSize: 28,
-                          fontWeight: FontWeight.w800,
-                        )),
-                      ),
-                    ),
+                    const MadiLogo(size: 68),
                     const SizedBox(height: 16),
                     const Text('MADI', style: TextStyle(
                       color: AppTheme.gold,

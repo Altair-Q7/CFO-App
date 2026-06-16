@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../services/mock_data_service.dart';
+import '../../widgets/madi_presence_indicator.dart';
 
 class AdvisorListScreen extends StatelessWidget {
   const AdvisorListScreen({super.key});
@@ -8,8 +9,28 @@ class AdvisorListScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final advisors = MockDataService().getMockAdvisors();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('CFO Marketplace')),
+      backgroundColor: AppTheme.baseColor(context),
+      appBar: AppBar(
+        backgroundColor:
+            isDark ? AppTheme.navyDeep : AppTheme.surfaceColor(context),
+        elevation: 0,
+        scrolledUnderElevation: 1,
+        title: Text('CFO Marketplace',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: isDark
+                  ? AppTheme.textOnDark
+                  : AppTheme.onSurfaceText(context),
+            )),
+        actions: [
+          const MadiPresenceIndicator(),
+          const SizedBox(width: 8),
+        ],
+      ),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: advisors.length,
@@ -46,7 +67,7 @@ class AdvisorListScreen extends StatelessWidget {
                         width: 56,
                         height: 56,
                         decoration: BoxDecoration(
-                          gradient: AppTheme.primaryGradient,
+                          gradient: AppTheme.navyGradient,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Center(
@@ -67,46 +88,50 @@ class AdvisorListScreen extends StatelessWidget {
                           children: [
                             Text(
                               a.name,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
-                                color: AppTheme.textPrimary,
+                                color: AppTheme.onSurfaceText(context),
                               ),
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${a.specialization} • ${a.region}',
-                              style: const TextStyle(
+                              '${a.specialization} \u2022 ${a.region}',
+                              style: TextStyle(
                                 fontSize: 12,
-                                color: AppTheme.textSecondary,
+                                color: AppTheme.onSurfaceTextSecondary(context),
                               ),
                             ),
                             const SizedBox(height: 4),
                             Row(
                               children: [
                                 const Icon(Icons.star_rounded,
-                                    size: 14, color: AppTheme.accentGold),
+                                    size: 14, color: AppTheme.gold),
                                 const SizedBox(width: 4),
                                 Text(
                                   a.rating.toStringAsFixed(1),
                                   style: const TextStyle(
                                       fontSize: 12,
-                                      fontWeight: FontWeight.w600),
+                                      fontWeight: FontWeight.w600,
+                                      color: AppTheme.gold),
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   '${a.experience} yrs',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                       fontSize: 12,
-                                      color: AppTheme.textSecondary),
+                                      color: AppTheme.onSurfaceTextSecondary(
+                                          context)),
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   '\$${a.pricePerHour}/hr',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: AppTheme.primary,
+                                    color: isDark
+                                        ? AppTheme.gold
+                                        : AppTheme.navyDeep,
                                   ),
                                 ),
                               ],
@@ -119,8 +144,9 @@ class AdvisorListScreen extends StatelessWidget {
                             horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
                           color: isAvailable
-                              ? AppTheme.success.withOpacity(0.1)
-                              : AppTheme.textHint.withOpacity(0.1),
+                              ? AppTheme.emerald.withValues(alpha: 0.1)
+                              : AppTheme.onSurfaceTextMuted(context)
+                                  .withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -129,8 +155,8 @@ class AdvisorListScreen extends StatelessWidget {
                             fontSize: 10,
                             fontWeight: FontWeight.w600,
                             color: isAvailable
-                                ? AppTheme.success
-                                : AppTheme.textHint,
+                                ? AppTheme.emerald
+                                : AppTheme.onSurfaceTextMuted(context),
                           ),
                         ),
                       ),

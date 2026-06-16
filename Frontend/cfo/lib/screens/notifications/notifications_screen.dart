@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../services/mock_data_service.dart';
+import '../../widgets/madi_presence_indicator.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -12,13 +13,11 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen> {
   final _mock = MockDataService();
   late Map<String, dynamic> _data;
-  bool _initialized = false;
 
   @override
   void initState() {
     super.initState();
     _data = _mock.getMockNotifications();
-    _initialized = true;
   }
 
   void _markAllRead() {
@@ -41,15 +40,35 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Widget build(BuildContext context) {
     final notifications = _data['notifications'] as List;
     final unread = _data['unreadCount'] as int;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: AppTheme.baseColor(context),
       appBar: AppBar(
-        title: const Text('Notifications'),
+        backgroundColor:
+            isDark ? AppTheme.navyDeep : AppTheme.surfaceColor(context),
+        elevation: 0,
+        scrolledUnderElevation: 1,
+        title: Text('Notifications',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: isDark
+                  ? AppTheme.textOnDark
+                  : AppTheme.onSurfaceText(context),
+            )),
         actions: [
+          const MadiPresenceIndicator(),
+          const SizedBox(width: 4),
           if (unread > 0)
             TextButton(
               onPressed: _markAllRead,
-              child: const Text('Mark All Read'),
+              child: Text('Mark Read',
+                  style: TextStyle(
+                    color: isDark ? AppTheme.gold : AppTheme.navyDeep,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  )),
             ),
         ],
       ),
@@ -63,11 +82,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 10),
-                    color: AppTheme.info.withOpacity(0.08),
+                    color: AppTheme.navyMid.withValues(alpha: 0.08),
                     child: Text(
                       '$unread unread notification${unread > 1 ? 's' : ''}',
-                      style: const TextStyle(
-                        color: AppTheme.info,
+                      style: TextStyle(
+                        color: isDark ? AppTheme.gold : AppTheme.navyMid,
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
                       ),
@@ -95,8 +114,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       decoration: BoxDecoration(
         color: AppTheme.surfaceColor(context),
         borderRadius: BorderRadius.circular(14),
-        border:
-            !n.read ? Border.all(color: AppTheme.info.withValues(alpha: 0.2)) : Border.all(color: AppTheme.borderColor(context), width: 0.5),
+        border: !n.read
+            ? Border.all(color: AppTheme.gold.withValues(alpha: 0.3))
+            : Border.all(color: AppTheme.borderColor(context), width: 0.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -113,13 +133,15 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             height: 42,
             decoration: BoxDecoration(
               color: n.read
-                  ? AppTheme.textHint.withValues(alpha: 0.08)
+                  ? AppTheme.onSurfaceTextMuted(context).withValues(alpha: 0.08)
                   : _typeColor(n.type).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               _typeIcon(n.type),
-              color: n.read ? AppTheme.textHint : _typeColor(n.type),
+              color: n.read
+                  ? AppTheme.onSurfaceTextMuted(context)
+                  : _typeColor(n.type),
               size: 20,
             ),
           ),
@@ -133,23 +155,23 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   style: TextStyle(
                     fontWeight: n.read ? FontWeight.normal : FontWeight.w600,
                     fontSize: 14,
-                    color: AppTheme.textPrimary,
+                    color: AppTheme.onSurfaceText(context),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   n.message,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppTheme.textSecondary,
+                    color: AppTheme.onSurfaceTextSecondary(context),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   _timeAgo(n.createdAt),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
-                    color: AppTheme.textHint,
+                    color: AppTheme.onSurfaceTextMuted(context),
                   ),
                 ),
               ],
@@ -165,7 +187,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   height: 10,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppTheme.info,
+                    color: AppTheme.gold,
                   ),
                 ),
               ),
@@ -178,13 +200,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   Color _typeColor(String type) {
     switch (type) {
       case 'warning':
-        return AppTheme.warning;
+        return AppTheme.amber;
       case 'success':
-        return AppTheme.success;
+        return AppTheme.emerald;
       case 'error':
-        return AppTheme.error;
+        return AppTheme.coral;
       default:
-        return AppTheme.info;
+        return AppTheme.navyMid;
     }
   }
 

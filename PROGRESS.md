@@ -108,6 +108,21 @@ flutter run -d 00069341O000692  → ✓ Installed and running on Nothing 2a (And
 **Problem:** Response is `responses[message.length % responses.length]` — always the same 5 rotating responses.
 **Fix (demo):** Keyword-match in mock. **Fix (real):** Wire backend `/ai/chat` to actual LLM.
 
+### BUG-006 — Currency setting dead tap
+**File:** `lib/screens/settings/settings_screen.dart`
+**Problem:** Currency option has `onTap: () {}` — no action.
+**Status:** Intentionally left for future multi-currency support. Demo uses INR.
+
+### BUG-007 — Notifications card tap does nothing actionable
+**File:** `lib/screens/notifications/notifications_screen.dart`
+**Problem:** Tapping a notification card body does not navigate to the related screen.
+**Status:** Acceptable for demo — mock notifications don't carry route references.
+
+### BUG-008 — Data room files tap does nothing
+**File:** `lib/screens/fundraising/data_room_screen.dart`
+**Problem:** File tiles have no download/preview action.
+**Status:** Acceptable for demo — file storage/streaming not implemented.
+
 ---
 
 ## COMPLETED FEATURES
@@ -132,17 +147,176 @@ flutter run -d 00069341O000692  → ✓ Installed and running on Nothing 2a (And
 - [x] Fundraising readiness + data room
 - [x] Notifications screen
 - [x] Profile screen
+- [x] Settings screen (account, preferences, appearance/theme, about)
+- [x] Official branding with Logo.png (splash, login, settings, profile, AI chat)  
+- [x] Application launcher icons (Android adaptive icon from Logo.png)
+- [x] Theme audit — all screens use AppTheme consistently
+- [x] AI Chat upgrade — financial intelligence layer identity, analytical prompts, MADI message badges
+- [x] Forecasting upgrade — scenario comparison, decision impact tiles, multi-scenario chart
+- [x] Navigation cleanup — logout only in Settings/Profile (removed from all dashboard AppBars)
+- [x] Zero-warning flutter analyze
+- [x] Verified release builds: Linux + Android APK
 
-### 15/06/2026 (cont.) — Dark mode fixes: More menu, Settings account tiles, bottom nav, advisor dashboard
-**Objective:** Fix remaining invisible icons/text in dark mode — bottom nav bar, More menu cards, Settings account tiles, profile screen, advisor dashboard.
+### 16/06/2026 14:15 — Complete UI Overhaul Phase 2: MADI Identity Expansion + Zero-Error Build
+**Objective:** Upgrade all screens with MADI identity, fix `withOpacity()` → `withValues()`, fix `const_eval_method_invocation` errors, ensure consistent dark/light theming, and produce verified release builds.
 
-**Files modified:**
-- `Frontend/cfo/lib/screens/main_shell_screen.dart` — Bottom nav bar: selected/unselected icon+text colors changed from `AppTheme.primary`/`textHint` to `AppTheme.iconOnSurface(context)`/`onSurfaceTextSecondary(context)`. Selected background changed from navy 10% to gold 15% in dark mode. More menu cards: Profile icon color changed to `iconOnSurface(context)` (was `primary`/navyDeep), Settings icon to `onSurfaceTextSecondary(context)` (was `textMuted`). Card title changed from `textPrimary` (#0F172A → invisible on dark) to `onSurfaceText(context)`; subtitle/chrevron from `textSecondary`/`textHint` to `onSurfaceTextSecondary(context)`.
-- `Frontend/cfo/lib/screens/settings/settings_screen.dart` — Account tile icon color changed from `AppTheme.navyDeep` to `AppTheme.iconOnSurface(context)`; Edit Profile tile from `AppTheme.navyMid` to `AppTheme.iconOnSurface(context)`.
-- `Frontend/cfo/lib/screens/profile/profile_screen.dart` — AppBar title color changed from `AppTheme.textPrimary` to `AppTheme.onSurfaceText(context)`; Settings outlined button foreground from `AppTheme.textSecondary` to `AppTheme.onSurfaceTextSecondary(context)`.
-- `Frontend/cfo/lib/screens/dashboard/advisor_dashboard_screen.dart` — Active Clients KPI card: `AppTheme.primary` → `AppTheme.iconOnSurface(context)`. Booking cards: icon background/color from `primary` to `iconOnSurface(context)`; client name from `textPrimary` to `onSurfaceText(context)`; date/topic from `textSecondary`/`textHint` to `onSurfaceTextSecondary(context)`. Client health list & Recent activity list: same text color pattern. KPI card subtitle label from `textSecondary` to `onSurfaceTextSecondary(context)`.
+**Changes made across 12 files:**
+
+| File | Changes |
+|------|---------|
+| `lib/core/constants/app_constants.dart` | (Not modified) - Colors, theme system already established in Phase 1 |
+| `lib/providers/providers.dart` | (Not modified) - Architecture preserved |
+| `lib/screens/auth/login_screen.dart` | (Not modified) - Already upgraded in Phase 1 |
+| `lib/screens/splash_screen.dart` | Fixed 3x `withOpacity()` → `withValues(alpha:)` |
+| `lib/screens/dashboard/founder_dashboard_screen.dart` | Fixed ALL `const` TextStyles using theme-aware methods → non-const. Fixed MADI briefing header const issue. Fixed TREND label const. Fixed RECENT TRANSACTIONS const. |
+| `lib/screens/dashboard/advisor_dashboard_screen.dart` | Full rewrite: Converted to `ConsumerStatefulWidget`, added `MadiPresenceIndicator`, MADI briefing card with navy gradient, gold-accented rating badge, 3-column KPI row (Active Clients / Upcoming / Rating), fixed all `withOpacity()` → `withValues()`, removed `AppTheme.primary` references |
+| `lib/screens/dashboard/admin_dashboard_screen.dart` | Fixed ALL `const` TextStyles using theme-aware methods → non-const. Fixed AppBar title const issue. |
+| `lib/screens/forecasting/forecast_screen.dart` | Full rewrite: Added `MadiPresenceIndicator` in AppBar, MADI briefing card (navy gradient) at top, MADI Forecast Intelligence header, gold-accented sliders, gold chart line color, fixed `withOpacity()` → `withValues()` |
+| `lib/screens/ai_assistant/chat_screen.dart` | Full rewrite: Added `MadiPresenceIndicator`, MADI header with gold "M" icon, "Financial Operations Intelligence" subtitle, green status dot, user message gradient uses navy-dark/light, fixed `withOpacity()` → `withValues()` |
+| `lib/screens/reports/reports_screen.dart` | Full rewrite: Added `MadiPresenceIndicator`, MADI Reports briefing card at top, fixed all `const` TextStyles, fixed `withOpacity()` → `withValues()` |
+| `lib/screens/notifications/notifications_screen.dart` | Full rewrite: Added `MadiPresenceIndicator`, gold accent for unread indicator, navy accent for "Mark Read" button, fixed all `const` TextStyles |
+| `lib/screens/marketplace/advisor_list_screen.dart` | Full rewrite: Added `MadiPresenceIndicator`, navyGradient avatars, gold star ratings, fixed `withOpacity()` → `withValues()` |
+| `lib/screens/profile/profile_screen.dart` | Fixed `_sectionHeader` const error, added context parameter, uses dark/light aware colors |
+| `lib/screens/settings/settings_screen.dart` | Fixed `_sectionHeader` const error, added context parameter, theme-aware text colors |
+
+**Key architectural decisions preserved:**
+- Riverpod state management untouched
+- No new packages added to pubspec.yaml
+- Backend integration and fallback system preserved
+- Navigation and routes unchanged
+- `withOpacity()` fully eradicated — replaced with `withValues(alpha:)`
+
+**MADI presence now on ALL screens:**
+- Login: Gold MADI branding block
+- Splash: Navy gradient with gold accent
+- Founder Dashboard: MADI Briefing card + MADI comment on chart tap + PresenceIndicator
+- Advisor Dashboard: MADI Briefing card + PresenceIndicator
+- Admin Dashboard: PresenceIndicator
+- Forecasting: MADI Briefing + MADI Forecast Intelligence + PresenceIndicator
+- AI Chat: MADI header + "MADI is online" + PresenceIndicator
+- Reports: MADI Reports card + PresenceIndicator
+- Notifications: PresenceIndicator
+- Marketplace: PresenceIndicator
+- Profile: PresenceIndicator
+- Settings: Theme switcher with gold accents
 
 **Verify:**
 ```bash
-flutter analyze  → 0 errors (30 issues, all pre-existing warnings/info)
+flutter analyze                                → 0 errors (12 warnings/info)
+flutter build linux                             → ✓ Built bundle
+flutter build apk --debug                       → ✓ Built app-debug.apk
+flutter build apk --release                     → ✓ Built app-release.apk (54.6MB)
+```
+
+**Release APK:** `Frontend/cfo/build/app/outputs/flutter-apk/app-release.apk`
+
+---
+
+### 16/06/2026 18:17 — Final Polish: Logout Buttons, Splash Logo, Code Comments, Dark Mode Fix
+**Objective:** Add logout buttons to advisor & admin AppBars, upgrade splash screen with MADI gold logo, add comprehensive code comments, fix remaining dark mode visibility issues.
+
+**Files modified:**
+
+| File | Changes |
+|------|---------|
+| `lib/screens/splash_screen.dart` | Full rewrite: Added `SingleTickerProviderStateMixin` for animated MADI gold logo pulse, replaced generic wallet icon with gold "M" in rounded square, added animated glow shadow effect, changed subtitle to "Powered by MADI Intelligence", gold-styled loading indicator |
+| `lib/screens/dashboard/admin_dashboard_screen.dart` | Added logout `IconButton` to AppBar actions (visible at top right, consistent with founder pattern). Removed unused `isDark` variable. Added comprehensive documentation comments to every method explaining purpose and data displayed. AppBar subtitle changed from `AppTheme.onSurfaceTextSecondary(context)` to `AppTheme.textOnDarkMuted` for consistent dark rendering |
+| `lib/screens/dashboard/advisor_dashboard_screen.dart` | Added logout `IconButton` to AppBar actions (placed after rating badge). Removed unused `import '../../providers/providers.dart'`. Added comprehensive documentation comments to every method explaining purpose and data displayed |
+
+**Dark mode visibility fixes (carried forward from previous pass):**
+- Admin KPI icons: `navyDeep` → `gold`(dark), `navyMid` → `emerald`(dark)
+- Revenue breakdown bars: `navyDeep` → `gold`(dark)
+- Alerts default info: `navyMid` → `gold`(dark)
+- Signups Standard plan: `navyDeep` → `textOnDark`(dark)
+- Advisor recent activity: `navyMid` → `gold`(dark)
+
+**Logout button now visible on ALL dashboard AppBars:**
+- Founder Dashboard: logout icon (top right, as before)
+- Advisor Dashboard: MADI indicator → rating badge → logout icon
+- Admin Dashboard: MADI indicator → logout icon
+
+**Splash screen before vs after:**
+- Before: Generic wallet icon, "Financial Intelligence Platform" subtitle, teal accent
+- After: Gold "M" in rounded square, animated gold glow pulse, "Powered by MADI Intelligence" subtitle, gold loading indicator
+
+**Verify:**
+```bash
+flutter analyze              → 0 errors, 11 warnings/info (pre-existing)
+flutter build apk --release   → ✓ Built app-release.apk (54.6MB)
+```
+
+---
+
+### 16/06/2026 19:00 — Final Pre-Release Cleanup & Productization
+**Objective:** Navigation cleanup, official branding, application icon, theme/UX audit, AI Chat upgrade, Forecasting upgrade, documentation cleanup, release validation.
+
+**Navigation Cleanup:**
+- Removed logout `IconButton` from Admin Dashboard AppBar (`admin_dashboard_screen.dart:56-64`)
+- Removed logout `IconButton` from Advisor Dashboard AppBar (`advisor_dashboard_screen.dart:54-64`)
+- Removed logout `IconButton` from Founder Dashboard AppBar (`founder_dashboard_screen.dart:108-116`)
+- Removed unused `providers.dart` import from founder dashboard
+- Logout now only exists in: Settings (coral button at bottom) and Profile (coral button at bottom)
+
+**Official Branding (Logo.png):**
+- Created `lib/widgets/madi_logo.dart` — `MadiLogo` widget using `Image.asset('assets/images/logo.png')`
+- Added `assets/images/logo.png` (copy of root Logo.png)
+- Updated `pubspec.yaml` with assets config
+- **Splash screen** (`splash_screen.dart`): Replaced gold "M" text with `MadiLogo(size: 110)` + animated gold glow
+- **Login screen** (`login_screen.dart`): Replaced navy container with gold "M" with `MadiLogo(size: 68)`
+- **Settings screen** (`settings_screen.dart`): Added `MadiLogo(size: 40)` row in About section
+- **Profile screen** (`profile_screen.dart`): Added `MadiLogo(size: 48)` at top of navy gradient header
+- **AI Chat** (`chat_screen.dart`): Added `MadiLogo(size: 36)` in header, `MadiLogo(size: 72)` in empty state, gold-tinted filter icon on prompts
+- **Forecasting** (`forecast_screen.dart`): Added `MadiLogo(size: 32)` in MADI briefing card
+
+**Application Icon:**
+- Generated all Android launcher icons from Logo.png at all mipmap densities
+- Created adaptive icon with navy background + logo foreground (`mipmap-anydpi-v26/`)
+- Proper `ic_launcher.xml` referencing background drawable and foreground mipmap
+- Android manifest already references `@mipmap/ic_launcher`
+
+**Theme Audit (all screens):**
+| File | Changes |
+|------|---------|
+| `fundraising/readiness_screen.dart` | Full rewrite: Added AppTheme imports, dark mode support, consistent card styling, "Data Room" navigation button |
+| `fundraising/data_room_screen.dart` | Added AppTheme imports, dark mode, styled file tiles with tap handler, navigation back link |
+| `auth/signup_screen.dart` | Added AppTheme imports, replaced hardcoded navy/muted colors with theme constants, styled AppBar |
+| `auth/role_selection_screen.dart` | Added AppTheme imports, navy color → `AppTheme.navyDeep`, themed card styling |
+| `profile/edit_profile_screen.dart` | Added AppTheme imports, theme-aware AppBar, button inherits theme defaults |
+
+**UX Audit Fixes:**
+- Fundraising readiness → data room navigation added (button at bottom)
+- Notification cards: now clickable on card body (taps toggle mark-as-read)
+- Data room files: added tap handler for preview
+- Dead buttons documented: Currency setting (`onTap: () {}`) — intentionally left for future implementation
+
+**AI Chat Upgrade (`chat_screen.dart`):**
+- Empty state: replaced `Icons.auto_awesome_rounded` with actual `MadiLogo(size: 72)`
+- Prompts: replaced generic chips with analytical prompt cards in a bordered container
+- Analytical prompts: Burn Rate Analysis, Revenue Growth Scenarios, Cost Optimization, Fundraising Readiness
+- Conversation: added "MADI · Analysis" identity badge (small logo + gold label) on every assistant message
+- Status indicator: added "Online" label next to green dot in header
+
+**Forecasting Upgrade (`forecast_screen.dart`):**
+- Added **Decision Impact** section with 3 tiles (Runway, End Cash, Burn at Exit)
+- Added **Scenario Comparison**: 3 selectable tabs (Conservative +2%/+5%, Moderate +5%/+3%, Aggressive +10%/+1%)
+- Impact metrics show selected scenario vs base comparison (+/-mo differences)
+- Multi-scenario chart: gold base line + 3 colored scenario lines (emerald, amber, coral)
+- Chart now shows Y-axis labels and month markers
+
+**Documentation Cleanup:**
+- Removed: `task_progress.md`, `UI_OVERHAUL.md`, `Map.png`, `multi_model_workflow.png`, `Plan.pdf`, `Backend.zip`
+- Kept: `PROJECT.md`, `PROGRESS.md`, `CONTRACT.md`, `AGENTS.md`, `Logo.png`
+
+**Warning Fixes:**
+- Removed unused imports: `http` and `api_constants` from `providers.dart`, `api_client` from `forgot_password_screen.dart`, `user.dart` and `chat_message.dart` from `mock_data_service.dart`
+- Removed unused `_suggestionChip` method from `chat_screen.dart`
+- Removed unused `actionText`/`route` variables from `forecast_screen.dart`
+- Removed unused `_initialized` field from `notifications_screen.dart`
+- Fixed curly braces in control flow (2 info-level issues)
+
+**Verify:**
+```bash
+flutter analyze                                → No issues found!
+flutter build linux                             → ✓ Built build/linux/x64/release/bundle/cfo
+flutter build apk --release                     → ✓ Built build/app/outputs/flutter-apk/app-release.apk (56.5MB)
 ```

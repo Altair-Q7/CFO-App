@@ -1,3 +1,11 @@
+// =============================================================================
+// MainShellScreen — Role-aware bottom navigation shell
+// =============================================================================
+// Provides the bottom navigation bar for all three roles (founder, advisor,
+// admin). Each role gets role-appropriate tabs. Logout is NOT a navigation
+// tab — it lives in Settings and Profile screens only.
+// =============================================================================
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/constants/app_constants.dart';
@@ -19,8 +27,6 @@ class MainShellScreen extends ConsumerStatefulWidget {
 
 class _MainShellScreenState extends ConsumerState<MainShellScreen> {
   int _currentIndex = 0;
-
-  // Reset tab index when role changes (e.g. after re-login)
   String _lastRole = '';
 
   @override
@@ -28,7 +34,7 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
     final auth = ref.watch(authProvider);
     final role = auth.role;
 
-    // Reset to tab 0 if role changed
+    // Reset to tab 0 when role changes (e.g. after re-login)
     if (_lastRole != role) {
       _lastRole = role;
       _currentIndex = 0;
@@ -39,8 +45,6 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
     final tabs = config['tabs'] as List<Map<String, dynamic>>;
 
     return Scaffold(
-      // Each screen is responsible for its own AppBar.
-      // Shell only provides the bottom nav and logout.
       body: IndexedStack(
         index: _currentIndex,
         children: screens,
@@ -66,22 +70,16 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
                 final isSelected = _currentIndex == i;
                 return GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onTap: () {
-                    if (tab['action'] != null) {
-                      (tab['action'] as VoidCallback)();
-                    } else {
-                      setState(() => _currentIndex = i);
-                    }
-                  },
+                  onTap: () => setState(() => _currentIndex = i),
                   child: Container(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                     decoration: BoxDecoration(
-                    color: isSelected
-                                ? (Theme.of(context).brightness == Brightness.dark
-                                    ? AppTheme.gold.withValues(alpha: 0.15)
-                                    : AppTheme.primary.withValues(alpha: 0.1))
-                                : Colors.transparent,
+                      color: isSelected
+                          ? (Theme.of(context).brightness == Brightness.dark
+                              ? AppTheme.gold.withValues(alpha: 0.15)
+                              : AppTheme.navyDeep.withValues(alpha: 0.1))
+                          : Colors.transparent,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -90,8 +88,9 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
                         Icon(
                           tab['icon'] as IconData,
                           size: 22,
-                          color:
-                              isSelected ? AppTheme.iconOnSurface(context) : AppTheme.onSurfaceTextSecondary(context),
+                          color: isSelected
+                              ? AppTheme.iconOnSurface(context)
+                              : AppTheme.onSurfaceTextSecondary(context),
                         ),
                         const SizedBox(height: 3),
                         Text(
@@ -118,6 +117,8 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
     );
   }
 
+  /// Returns the screens/tabs config for the given role.
+  /// Logout is NOT a navigation tab — it's accessible from Settings/Profile.
   Map<String, dynamic> _getConfig(String role) {
     switch (role) {
       case 'advisor':
@@ -126,17 +127,11 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
             const AdvisorDashboardScreen(),
             const AiChatScreen(),
             const ProfileScreen(),
-            _buildLogoutScreen(),
           ],
           'tabs': [
             {'icon': Icons.people_rounded, 'label': 'Clients'},
             {'icon': Icons.smart_toy_rounded, 'label': 'AI Tools'},
             {'icon': Icons.person_rounded, 'label': 'Profile'},
-            {
-              'icon': Icons.logout_rounded,
-              'label': 'Logout',
-              'action': _logout,
-            },
           ],
         };
       case 'admin':
@@ -145,17 +140,11 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
             const AdminDashboardScreen(),
             const ReportsScreen(),
             const ProfileScreen(),
-            _buildLogoutScreen(),
           ],
           'tabs': [
             {'icon': Icons.analytics_rounded, 'label': 'Platform'},
             {'icon': Icons.bar_chart_rounded, 'label': 'Reports'},
             {'icon': Icons.person_rounded, 'label': 'Profile'},
-            {
-              'icon': Icons.logout_rounded,
-              'label': 'Logout',
-              'action': _logout,
-            },
           ],
         };
       default: // founder
@@ -178,29 +167,20 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
     }
   }
 
-  Future<void> _logout() async {
-    await ref.read(authProvider.notifier).logout();
-    if (mounted) {
-      Navigator.pushReplacementNamed(context, '/login');
-    }
-  }
-
-  Widget _buildLogoutScreen() {
-    // Never actually shown — logout tab triggers action directly
-    return const SizedBox.shrink();
-  }
-
+  /// Founder's "More" menu with secondary navigation items
   Widget _buildMoreMenu() {
     return Scaffold(
+      backgroundColor: AppTheme.baseColor(context),
       appBar: AppBar(
-        title: const Text('More'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout_rounded),
-            onPressed: _logout,
-            tooltip: 'Logout',
-          ),
-        ],
+        backgroundColor: AppTheme.surfaceColor(context),
+        elevation: 0,
+        scrolledUnderElevation: 1,
+        title: Text('More',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.onSurfaceText(context),
+            )),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -209,21 +189,21 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
             Icons.store_rounded,
             'Marketplace',
             'Find and book CFO advisors',
-            AppTheme.info,
+            AppTheme.navyMid,
             () => Navigator.pushNamed(context, '/marketplace'),
           ),
           _menuCard(
             Icons.volunteer_activism_rounded,
             'Fundraising',
             'Readiness score & data room',
-            AppTheme.success,
+            AppTheme.emerald,
             () => Navigator.pushNamed(context, '/fundraising'),
           ),
           _menuCard(
             Icons.notifications_rounded,
             'Notifications',
             'Alerts and updates',
-            AppTheme.warning,
+            AppTheme.amber,
             () => Navigator.pushNamed(context, '/notifications'),
           ),
           _menuCard(
@@ -246,6 +226,7 @@ class _MainShellScreenState extends ConsumerState<MainShellScreen> {
     );
   }
 
+  /// Standardized menu card widget with icon, title, subtitle, chevron
   Widget _menuCard(IconData icon, String title, String subtitle, Color color,
       VoidCallback onTap) {
     final surface = AppTheme.surfaceColor(context);

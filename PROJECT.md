@@ -59,6 +59,8 @@ CFO App/
 │           └── pdfGenerator.js
 │
 ├── Frontend/cfo/
+│   ├── assets/images/
+│   │   └── logo.png                ← MADI official logo (1024×1024)
 │   └── lib/
 │       ├── main.dart                ← app entry point
 │       ├── app.dart                 ← routes + MaterialApp
@@ -76,24 +78,45 @@ CFO App/
 │       │   └── providers.dart        ← ALL Riverpod providers (CAREFUL)
 │       ├── screens/
 │       │   ├── auth/
-│       │   │   └── login_screen.dart
+│       │   │   ├── login_screen.dart
+│       │   │   ├── signup_screen.dart
+│       │   │   ├── forgot_password_screen.dart
+│       │   │   └── role_selection_screen.dart
 │       │   ├── dashboard/
 │       │   │   ├── founder_dashboard_screen.dart
 │       │   │   ├── advisor_dashboard_screen.dart
 │       │   │   └── admin_dashboard_screen.dart
+│       │   ├── forecasting/
+│       │   │   └── forecast_screen.dart
+│       │   ├── ai_assistant/
+│       │   │   └── chat_screen.dart
+│       │   ├── reports/
+│       │   │   ├── reports_screen.dart
+│       │   │   ├── pnl_report_screen.dart
+│       │   │   ├── balance_sheet_screen.dart
+│       │   │   └── cash_flow_screen.dart
+│       │   ├── marketplace/
+│       │   │   ├── advisor_list_screen.dart
+│       │   │   ├── advisor_detail_screen.dart
+│       │   │   └── booking_screen.dart
+│       │   ├── fundraising/
+│       │   │   ├── readiness_screen.dart
+│       │   │   └── data_room_screen.dart
+│       │   ├── notifications/
+│       │   │   └── notifications_screen.dart
+│       │   ├── onboarding/
+│       │   │   └── onboarding_screen.dart
+│       │   ├── profile/
+│       │   │   ├── profile_screen.dart
+│       │   │   └── edit_profile_screen.dart
 │       │   ├── settings/
 │       │   │   └── settings_screen.dart
-│       │   ├── main_shell_screen.dart
-│       │   ├── forecasting/
-│       │   ├── ai_assistant/
-│       │   ├── reports/
-│       │   ├── marketplace/
-│       │   ├── fundraising/
-│       │   ├── notifications/
-│       │   └── profile/
+│       │   ├── splash_screen.dart
+│       │   └── main_shell_screen.dart
 │       ├── widgets/
 │       │   ├── madi_briefing_card.dart
-│       │   └── madi_presence_indicator.dart
+│       │   ├── madi_presence_indicator.dart
+│       │   └── madi_logo.dart        ← Reusable MadiLogo widget
 │       └── services/
 │           ├── mock_data_service.dart
 │           ├── auth_service.dart
@@ -156,7 +179,9 @@ MADI is a Financial Operations Intelligence System — not a chatbot. Analytical
 |--------|------|---------|
 | `MadiBriefingCard` | `lib/widgets/madi_briefing_card.dart` | Pre-computed financial briefing with status-colored left border (4 sentences, action link) |
 | `MadiPresenceIndicator` | `lib/widgets/madi_presence_indicator.dart` | Gold pulsing dot + "MADI · 2h ago" — shown on every screen's AppBar |
-| `SettingsScreen` | `lib/screens/settings/settings_screen.dart` | App settings: account, preferences, about, logout |
+| `MadiLogo` | `lib/widgets/madi_logo.dart` | Reusable `Logo.png` asset image widget — consistent sizing across splash, login, settings, profile, AI chat |
+| `SettingsScreen` | `lib/screens/settings/settings_screen.dart` | App settings: account, preferences, appearance, about, logout |
+| `ProfileScreen` | `lib/screens/profile/profile_screen.dart` | Role-aware profile with MADI logo header, company/advisor/admin info, sign out |
 
 ### Briefing Card
 - **States:** `healthy` (emerald), `warning` (amber), `critical` (coral)
@@ -167,6 +192,12 @@ MADI is a Financial Operations Intelligence System — not a chatbot. Analytical
 - Gold pulsing dot using `AnimatedBuilder` with 2s ease-in-out loop
 - Shows "MADI · {lastReviewed}" text
 - Used in AppBar actions on founder dashboard and admin dashboard
+
+### MadiLogo
+- Displays `assets/images/logo.png` (1024×1024 PNG) with `ClipRRect` rounded corners
+- Parameters: `size` (default 40), `fit` (default `BoxFit.contain`)
+- Never stretches or distorts the logo
+- Used on: splash screen (animated gold glow), login branding, settings About section, profile header, AI Chat header + empty state
 
 ---
 
@@ -193,10 +224,25 @@ All colors via `AppTheme` in `lib/core/constants/app_constants.dart`:
 | `bodyText` | 14px, w400, 1.5 height — body copy |
 
 ### Card style
-- Standard: white bg, `borderRadius: 16`, `lightBorder` border, subtle shadow `(alpha 0.04, blur 12)`
+- Standard: white bg, `borderRadius: 16` (tiles use 14, cards use 16), `lightBorder` border, subtle shadow `(alpha 0.04, blur 12)`
 - Dark: `navyGradient` bg, white border `(alpha 0.08)`, used for MADI and admin headers
 - Section labels: 11px, w600, `textSecondary`, `letterSpacing 1.2`
-- Page background: `lightBase`
+- Page background: `lightBase` (light) or `darkBase` (dark)
+- Info tiles/cards: colored background `(alpha 0.06)` with matching border `(alpha 0.15)` for key metric emphasis
+
+### Theme switching
+- `themeProvider` (`StateNotifier<ThemeMode>`) with Light / Dark / System options
+- Persisted to `SharedPreferences` via `AppConstants.themeModeKey`
+- Theme toggle icon button on login screen (top-right corner)
+- Theme selection cards in Settings with gold highlight when selected
+- Dark mode: navy-deep AppBars (`navyDeep`), gold accent icons, dark elevated surfaces
+- Light mode: white AppBars (`surfaceColor`), navy accent icons
+
+### Application Icon
+- Source: `Logo.png` (1024×1024 PNG with navy background + gold MADI text)
+- Android: Adaptive icon with navy (`#0B1F3A`) background and logo foreground
+- Mipmap densities: mdpi (48px), hdpi (72px), xhdpi (96px), xxhdpi (144px), xxxhdpi (192px)
+- Web favicon + desktop icons: generated from same source
 
 ---
 

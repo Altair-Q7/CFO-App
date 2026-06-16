@@ -1,3 +1,15 @@
+// =============================================================================
+// AdminDashboardScreen — MADI Operations Center (Admin View)
+// =============================================================================
+// Full admin platform overview showing:
+//   - Platform Revenue (large hero metric on navy gradient)
+//   - 4 KPI grid: Total Founders, Total Advisors, Bookings, Uptime
+//   - Revenue Breakdown bar chart (SaaS MRR, Marketplace GMV, Enterprise)
+//   - Advisor Pipeline list with status badges (Verified/Pending/Suspended)
+//   - Platform Alerts (warning/success/info)
+//   - Recent Signups with plan badges
+// =============================================================================
+
 import 'package:flutter/material.dart';
 import '../../core/constants/app_constants.dart';
 import '../../services/mock_data_service.dart';
@@ -13,27 +25,34 @@ class AdminDashboardScreen extends StatefulWidget {
 class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   @override
   Widget build(BuildContext context) {
+    // Fetch mock admin platform metrics
     final data = MockDataService().getMockAdminMetrics();
 
     return Scaffold(
       backgroundColor: AppTheme.baseColor(context),
+      // Dark navy AppBar — command center feel, not a consumer app
       appBar: AppBar(
         backgroundColor: AppTheme.navyDeep,
         elevation: 0,
-        title: const Column(
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Operations Center', style: TextStyle(
-              color: Colors.white, fontSize: 16, fontWeight: FontWeight.w700,
-            )),
-            Text('The Scalable CFO \u00B7 Admin', style: TextStyle(
-              color: AppTheme.textSecondary, fontSize: 11,
-            )),
+            const Text('Operations Center',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                )),
+            Text('The Scalable CFO \u00B7 Admin',
+                style: TextStyle(
+                  color: AppTheme.textOnDarkMuted,
+                  fontSize: 11,
+                )),
           ],
         ),
         actions: [
           const MadiPresenceIndicator(),
-          const SizedBox(width: 12),
+          const SizedBox(width: 4),
         ],
       ),
       body: SafeArea(
@@ -56,6 +75,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
+  /// Large header card on navy gradient showing platform MRR
   Widget _buildRevenueHeader(Map<String, dynamic> data) {
     return Container(
       margin: const EdgeInsets.all(16),
@@ -67,25 +87,33 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('PLATFORM REVENUE', style: TextStyle(
-            fontSize: 11, fontWeight: FontWeight.w600,
-            letterSpacing: 1.2, color: AppTheme.textMuted,
-          )),
+          Text('PLATFORM REVENUE',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.2,
+                color: AppTheme.onSurfaceTextMuted(context),
+              )),
           const SizedBox(height: 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
+              // Large revenue figure
               Text(
                 '₹${((data['platformRevenue'] as num) / 100000).toStringAsFixed(1)}L',
                 style: const TextStyle(
-                  fontSize: 40, fontWeight: FontWeight.w800,
-                  color: Colors.white, letterSpacing: -1,
+                  fontSize: 40,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                  letterSpacing: -1,
                 ),
               ),
+              // Growth percentage badge
               Padding(
                 padding: const EdgeInsets.only(bottom: 8, left: 10),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: AppTheme.emerald.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
@@ -94,7 +122,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     '+${data['platformRevenueChange']}%',
                     style: const TextStyle(
                       color: AppTheme.emerald,
-                      fontSize: 12, fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -102,28 +131,32 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ],
           ),
           const SizedBox(height: 4),
-          const Text('Monthly Recurring Revenue', style: TextStyle(
-            fontSize: 12, color: AppTheme.textMuted,
-          )),
+          Text('Monthly Recurring Revenue',
+              style: TextStyle(
+                fontSize: 12,
+                color: AppTheme.onSurfaceTextMuted(context),
+              )),
         ],
       ),
     );
   }
 
+  /// 2x2 grid of KPI cards — each with icon, value, and subtitle
   Widget _buildKpiGrid(Map<String, dynamic> data) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final items = <Map<String, dynamic>>[
       {
         'label': 'TOTAL FOUNDERS',
         'value': '${data['totalFounders']}',
         'icon': Icons.people_rounded,
-        'color': AppTheme.navyDeep,
+        'color': isDark ? AppTheme.gold : AppTheme.navyDeep,
         'subtitle': '${data['activeThisMonth']} active this month',
       },
       {
         'label': 'TOTAL ADVISORS',
         'value': '${data['totalAdvisors']}',
         'icon': Icons.verified_user_rounded,
-        'color': AppTheme.navyMid,
+        'color': isDark ? AppTheme.emerald : AppTheme.navyMid,
         'subtitle': '${data['totalBookings']} bookings',
       },
       {
@@ -178,14 +211,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(item['label'] as String, style: const TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.8,
-                      color: AppTheme.textMuted,
-                    )),
+                    Text(item['label'] as String,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.8,
+                          color: AppTheme.onSurfaceTextMuted(context),
+                        )),
                     Container(
-                      width: 28, height: 28,
+                      width: 28,
+                      height: 28,
                       decoration: BoxDecoration(
                         color: color.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
@@ -195,15 +230,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                   ],
                 ),
-                Text(item['value'] as String, style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w800,
-                  color: AppTheme.onSurfaceText(context),
-                )),
-                Text(item['subtitle'] as String, style: TextStyle(
-                  fontSize: 11,
-                  color: AppTheme.onSurfaceTextSecondary(context),
-                )),
+                Text(item['value'] as String,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      color: AppTheme.onSurfaceText(context),
+                    )),
+                Text(item['subtitle'] as String,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: AppTheme.onSurfaceTextSecondary(context),
+                    )),
               ],
             ),
           );
@@ -212,12 +249,26 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
+  /// Three horizontal bars showing SaaS MRR, Marketplace GMV, Enterprise split
   Widget _buildRevenueBreakdown(Map<String, dynamic> data) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final totalRevenue = data['platformRevenue'] as int;
     final breakdown = [
-      {'label': 'SaaS MRR', 'value': totalRevenue * 0.65, 'color': AppTheme.navyDeep},
-      {'label': 'Marketplace GMV', 'value': totalRevenue * 0.22, 'color': AppTheme.emerald},
-      {'label': 'Enterprise', 'value': totalRevenue * 0.13, 'color': AppTheme.amber},
+      {
+        'label': 'SaaS MRR',
+        'value': totalRevenue * 0.65,
+        'color': isDark ? AppTheme.gold : AppTheme.navyDeep
+      },
+      {
+        'label': 'Marketplace GMV',
+        'value': totalRevenue * 0.22,
+        'color': AppTheme.emerald
+      },
+      {
+        'label': 'Enterprise',
+        'value': totalRevenue * 0.13,
+        'color': AppTheme.amber
+      },
     ];
 
     return Container(
@@ -238,12 +289,13 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('REVENUE BREAKDOWN', style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1.2,
-            color: AppTheme.textSecondary,
-          )),
+          Text('REVENUE BREAKDOWN',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.2,
+                color: AppTheme.onSurfaceTextSecondary(context),
+              )),
           const SizedBox(height: 16),
           ...breakdown.map((b) {
             final label = b['label'] as String;
@@ -258,20 +310,22 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(label, style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: AppTheme.textPrimary,
-                      )),
+                      Text(label,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: AppTheme.onSurfaceText(context),
+                          )),
                       Text('\u20B9${(value / 100000).toStringAsFixed(1)}L',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
-                            color: AppTheme.textPrimary,
+                            color: AppTheme.onSurfaceText(context),
                           )),
                     ],
                   ),
                   const SizedBox(height: 6),
+                  // Colored progress bar for each revenue stream
                   ClipRRect(
                     borderRadius: BorderRadius.circular(4),
                     child: LinearProgressIndicator(
@@ -282,10 +336,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text('$pct% of total', style: const TextStyle(
-                    fontSize: 10,
-                    color: AppTheme.textMuted,
-                  )),
+                  Text('$pct% of total',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: AppTheme.onSurfaceTextMuted(context),
+                      )),
                 ],
               ),
             );
@@ -295,6 +350,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
+  /// Advisor list with status badges (Verified = emerald, Pending = amber, Suspended = coral)
   Widget _buildAdvisorPipeline(Map<String, dynamic> data) {
     final advisors = data['advisorPipeline'] as List;
     return Padding(
@@ -302,14 +358,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 12),
-            child: Text('ADVISOR PIPELINE', style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
-              color: AppTheme.textSecondary,
-            )),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text('ADVISOR PIPELINE',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.2,
+                  color: AppTheme.onSurfaceTextSecondary(context),
+                )),
           ),
           ...advisors.map((a) {
             Color statusColor;
@@ -324,7 +381,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 statusColor = AppTheme.coral;
                 break;
               default:
-                statusColor = AppTheme.textMuted;
+                statusColor = AppTheme.onSurfaceTextMuted(context);
             }
             return Container(
               margin: const EdgeInsets.only(bottom: 8),
@@ -344,7 +401,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               child: Row(
                 children: [
                   Container(
-                    width: 40, height: 40,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
                       color: Theme.of(context).brightness == Brightness.dark
                           ? AppTheme.gold.withValues(alpha: 0.15)
@@ -354,38 +412,46 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     child: Icon(Icons.person_rounded,
                         color: Theme.of(context).brightness == Brightness.dark
                             ? AppTheme.gold
-                            : AppTheme.navyDeep, size: 20),
+                            : AppTheme.navyDeep,
+                        size: 20),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(a['name'] as String, style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? AppTheme.textOnDark
-                              : AppTheme.textPrimary,
-                        )),
+                        Text(a['name'] as String,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? AppTheme.textOnDark
+                                  : AppTheme.onSurfaceText(context),
+                            )),
                         const SizedBox(height: 2),
-                        Text('${a['clients']} clients \u00B7 \u2605 ${a['rating']}',
-                            style: const TextStyle(
-                              fontSize: 11, color: AppTheme.textSecondary)),
+                        Text(
+                            '${a['clients']} clients \u00B7 \u2605 ${a['rating']}',
+                            style: TextStyle(
+                                fontSize: 11,
+                                color:
+                                    AppTheme.onSurfaceTextSecondary(context))),
                       ],
                     ),
                   ),
+                  // Status badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(a['status'] as String,
                         style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: statusColor)),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: statusColor)),
                   ),
                 ],
               ),
@@ -396,6 +462,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
+  /// Alert items with color-coded backgrounds (warning=amber, success=emerald, info=gold)
   Widget _buildAlerts(Map<String, dynamic> data) {
     final alerts = data['alerts'] as List;
     return Padding(
@@ -403,14 +470,15 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 12),
-            child: Text('PLATFORM ALERTS', style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
-              color: AppTheme.textSecondary,
-            )),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text('PLATFORM ALERTS',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.2,
+                  color: AppTheme.onSurfaceTextSecondary(context),
+                )),
           ),
           ...alerts.map((a) {
             Color color;
@@ -425,7 +493,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 icon = Icons.check_circle_rounded;
                 break;
               default:
-                color = AppTheme.navyMid;
+                color = Theme.of(context).brightness == Brightness.dark
+                    ? AppTheme.gold
+                    : AppTheme.navyMid;
                 icon = Icons.info_rounded;
             }
             return Container(
@@ -453,6 +523,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     );
   }
 
+  /// Recent signups with role icons and plan badges (Premium/Pro=gold, Standard=white)
   Widget _buildRecentSignups(Map<String, dynamic> data) {
     final signups = data['recentSignups'] as List;
     return Padding(
@@ -460,16 +531,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 12),
-            child: Text('RECENT SIGNUPS', style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
-              color: AppTheme.textSecondary,
-            )),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text('RECENT SIGNUPS',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.2,
+                  color: AppTheme.onSurfaceTextSecondary(context),
+                )),
           ),
           ...signups.map((s) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
             Color planColor;
             switch (s['plan']) {
               case 'Premium':
@@ -477,10 +550,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 planColor = AppTheme.gold;
                 break;
               case 'Standard':
-                planColor = AppTheme.navyDeep;
+                planColor = isDark ? AppTheme.textOnDark : AppTheme.navyDeep;
                 break;
               default:
-                planColor = AppTheme.textSecondary;
+                planColor = AppTheme.onSurfaceTextSecondary(context);
             }
             return Container(
               margin: const EdgeInsets.only(bottom: 8),
@@ -499,8 +572,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
               child: Row(
                 children: [
+                  // Role-specific icon container
                   Container(
-                    width: 40, height: 40,
+                    width: 40,
+                    height: 40,
                     decoration: BoxDecoration(
                       color: (s['role'] == 'advisor'
                               ? AppTheme.navyMid
@@ -513,7 +588,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           ? Icons.verified_user_rounded
                           : Icons.business_rounded,
                       color: s['role'] == 'advisor'
-                          ? AppTheme.navyMid
+                          ? (isDark ? AppTheme.gold : AppTheme.navyMid)
                           : AppTheme.emerald,
                       size: 20,
                     ),
@@ -523,31 +598,35 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(s['name'] as String, style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.textPrimary,
-                        )),
+                        Text(s['name'] as String,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppTheme.onSurfaceText(context),
+                            )),
                         const SizedBox(height: 2),
                         Text(
                           '${s['daysAgo']} day${s['daysAgo'] == 1 ? '' : 's'} ago',
-                          style: const TextStyle(
-                            fontSize: 11, color: AppTheme.textSecondary),
+                          style: TextStyle(
+                              fontSize: 11,
+                              color: AppTheme.onSurfaceTextSecondary(context)),
                         ),
                       ],
                     ),
                   ),
+                  // Plan badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: planColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(s['plan'] as String,
                         style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: planColor)),
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: planColor)),
                   ),
                 ],
               ),

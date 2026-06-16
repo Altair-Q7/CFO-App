@@ -3,28 +3,37 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../../core/constants/app_constants.dart';
 import '../../services/mock_data_service.dart';
-import '../../providers/providers.dart';
 import '../../widgets/madi_presence_indicator.dart';
 
 class FounderDashboardScreen extends ConsumerStatefulWidget {
   const FounderDashboardScreen({super.key});
 
   @override
-  ConsumerState<FounderDashboardScreen> createState() => _FounderDashboardScreenState();
+  ConsumerState<FounderDashboardScreen> createState() =>
+      _FounderDashboardScreenState();
 }
 
-class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen> {
+class _FounderDashboardScreenState
+    extends ConsumerState<FounderDashboardScreen> {
   final _mock = MockDataService();
   int? _selectedMonth;
 
   static const _revenueSpots = [
-    FlSpot(0, 120000), FlSpot(1, 135000), FlSpot(2, 148000),
-    FlSpot(3, 162000), FlSpot(4, 174000), FlSpot(5, 185000),
+    FlSpot(0, 120000),
+    FlSpot(1, 135000),
+    FlSpot(2, 148000),
+    FlSpot(3, 162000),
+    FlSpot(4, 174000),
+    FlSpot(5, 185000),
   ];
 
   static const _expenseSpots = [
-    FlSpot(0, 85000), FlSpot(1, 92000), FlSpot(2, 98000),
-    FlSpot(3, 105000), FlSpot(4, 118000), FlSpot(5, 125000),
+    FlSpot(0, 85000),
+    FlSpot(1, 92000),
+    FlSpot(2, 98000),
+    FlSpot(3, 105000),
+    FlSpot(4, 118000),
+    FlSpot(5, 125000),
   ];
 
   String _getMadiChartComment(int month) {
@@ -56,12 +65,17 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('TechFlow Inc.', style: TextStyle(
-              fontSize: 16, fontWeight: FontWeight.w700, color: AppTheme.textPrimary,
-            )),
-            Text('Founder \u00B7 Financial Operations', style: TextStyle(
-              fontSize: 11, color: AppTheme.textSecondary,
-            )),
+            Text('TechFlow Inc.',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.onSurfaceText(context),
+                )),
+            Text('Founder \u00B7 Financial Operations',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: AppTheme.onSurfaceTextSecondary(context),
+                )),
           ],
         ),
         actions: [
@@ -73,13 +87,15 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
                 icon: Icon(Icons.notifications_outlined,
                     color: Theme.of(context).brightness == Brightness.dark
                         ? AppTheme.textOnDark
-                        : AppTheme.textPrimary),
+                        : AppTheme.onSurfaceText(context)),
                 onPressed: () => Navigator.pushNamed(context, '/notifications'),
               ),
               Positioned(
-                right: 8, top: 8,
+                right: 8,
+                top: 8,
                 child: Container(
-                  width: 8, height: 8,
+                  width: 8,
+                  height: 8,
                   decoration: const BoxDecoration(
                     color: AppTheme.coral,
                     shape: BoxShape.circle,
@@ -88,14 +104,7 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
               ),
             ],
           ),
-          IconButton(
-            icon: Icon(Icons.logout_rounded,
-                color: AppTheme.onSurfaceTextSecondary(context), size: 20),
-            onPressed: () async {
-              await ref.read(authProvider.notifier).logout();
-              if (context.mounted) Navigator.pushReplacementNamed(context, '/login');
-            },
-          ),
+
         ],
       ),
       body: RefreshIndicator(
@@ -154,40 +163,47 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
             child: Row(
               children: [
                 Container(
-                  width: 28, height: 28,
+                  width: 28,
+                  height: 28,
                   decoration: BoxDecoration(
                     color: AppTheme.gold.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Center(child: Text('M', style: TextStyle(
-                    color: AppTheme.gold,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                  ))),
+                  child: const Center(
+                      child: Text('M',
+                          style: TextStyle(
+                            color: AppTheme.gold,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                          ))),
                 ),
                 const SizedBox(width: 10),
-                const Column(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('MADI', style: TextStyle(
-                      color: AppTheme.gold,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1.5,
-                    )),
-                    Text('Financial Briefing', style: TextStyle(
-                      color: AppTheme.textMuted,
-                      fontSize: 11,
-                    )),
+                    const Text('MADI',
+                        style: TextStyle(
+                          color: AppTheme.gold,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.5,
+                        )),
+                    Text('Financial Briefing',
+                        style: TextStyle(
+                          color: AppTheme.onSurfaceTextMuted(context),
+                          fontSize: 11,
+                        )),
                   ],
                 ),
                 const Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+                    border:
+                        Border.all(color: statusColor.withValues(alpha: 0.3)),
                   ),
                   child: Text(
                     status.toUpperCase(),
@@ -221,7 +237,8 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
                     children: [
                       Container(
                         margin: const EdgeInsets.only(top: 7),
-                        width: 4, height: 4,
+                        width: 4,
+                        height: 4,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: i == 0
@@ -231,14 +248,16 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Text(sentence, style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: i == 0 ? FontWeight.w600 : FontWeight.w400,
-                          height: 1.6,
-                          color: i == 0
-                              ? Colors.white
-                              : Colors.white.withValues(alpha: 0.75),
-                        )),
+                        child: Text(sentence,
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight:
+                                  i == 0 ? FontWeight.w600 : FontWeight.w400,
+                              height: 1.6,
+                              color: i == 0
+                                  ? Colors.white
+                                  : Colors.white.withValues(alpha: 0.75),
+                            )),
                       ),
                     ],
                   ),
@@ -251,7 +270,8 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
               onTap: () => Navigator.pushNamed(context, route),
               child: Container(
                 margin: const EdgeInsets.fromLTRB(20, 8, 20, 18),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.06),
                   borderRadius: BorderRadius.circular(10),
@@ -265,11 +285,12 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
                         color: statusColor, size: 18),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: Text(actionText, style: TextStyle(
-                        color: statusColor,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      )),
+                      child: Text(actionText,
+                          style: TextStyle(
+                            color: statusColor,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          )),
                     ),
                     Icon(Icons.chevron_right_rounded,
                         color: Colors.white.withValues(alpha: 0.4), size: 18),
@@ -304,30 +325,33 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('RUNWAY', style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 1.2,
-                  color: AppTheme.onSurfaceTextSecondary(context),
-                )),
+                Text('RUNWAY',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.2,
+                      color: AppTheme.onSurfaceTextSecondary(context),
+                    )),
                 const SizedBox(height: 8),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text('11', style: TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -2,
-                      color: AppTheme.onSurfaceText(context),
-                      height: 1.0,
-                    )),
+                    Text('11',
+                        style: TextStyle(
+                          fontSize: 48,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -2,
+                          color: AppTheme.onSurfaceText(context),
+                          height: 1.0,
+                        )),
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8, left: 6),
-                      child: Text('months', style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: AppTheme.onSurfaceTextSecondary(context),
-                      )),
+                      child: Text('months',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: AppTheme.onSurfaceTextSecondary(context),
+                          )),
                     ),
                   ],
                 ),
@@ -345,7 +369,7 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
                 ),
                 const SizedBox(height: 6),
                 const Text('Below 12-month benchmark',
-                  style: TextStyle(fontSize: 12, color: AppTheme.amber)),
+                    style: TextStyle(fontSize: 12, color: AppTheme.amber)),
               ],
             ),
           ),
@@ -369,13 +393,19 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(label, style: const TextStyle(
-          fontSize: 11, color: AppTheme.textMuted, fontWeight: FontWeight.w500,
-        )),
+        Text(label,
+            style: TextStyle(
+              fontSize: 11,
+              color: AppTheme.onSurfaceTextMuted(context),
+              fontWeight: FontWeight.w500,
+            )),
         const SizedBox(height: 2),
-        Text(value, style: TextStyle(
-          fontSize: 16, fontWeight: FontWeight.w700, color: color,
-        )),
+        Text(value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: color,
+            )),
       ],
     );
   }
@@ -455,34 +485,39 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(m['label'] as String, style: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.0,
-                color: AppTheme.textMuted,
-              )),
+              Text(m['label'] as String,
+                  style: TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.0,
+                    color: AppTheme.onSurfaceTextMuted(context),
+                  )),
               Icon(m['icon'] as IconData, size: 16, color: color),
             ],
           ),
-          Text(m['value'] as String, style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.5,
-            color: AppTheme.onSurfaceText(context),
-          )),
+          Text(m['value'] as String,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.5,
+                color: AppTheme.onSurfaceText(context),
+              )),
           Row(
             children: [
               Icon(
-                positive ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+                positive
+                    ? Icons.arrow_upward_rounded
+                    : Icons.arrow_downward_rounded,
                 size: 11,
                 color: color,
               ),
               const SizedBox(width: 3),
-              Text(m['change'] as String, style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: color,
-              )),
+              Text(m['change'] as String,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: color,
+                  )),
             ],
           ),
         ],
@@ -492,10 +527,26 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
 
   Widget _buildQuickActions() {
     final actions = [
-      {'label': 'Forecast', 'icon': Icons.trending_up_rounded, 'route': '/forecast'},
-      {'label': 'Reports', 'icon': Icons.receipt_long_rounded, 'route': '/reports'},
-      {'label': 'Advisors', 'icon': Icons.people_rounded, 'route': '/marketplace'},
-      {'label': 'Fundraise', 'icon': Icons.rocket_launch_rounded, 'route': '/fundraising'},
+      {
+        'label': 'Forecast',
+        'icon': Icons.trending_up_rounded,
+        'route': '/forecast'
+      },
+      {
+        'label': 'Reports',
+        'icon': Icons.receipt_long_rounded,
+        'route': '/reports'
+      },
+      {
+        'label': 'Advisors',
+        'icon': Icons.people_rounded,
+        'route': '/marketplace'
+      },
+      {
+        'label': 'Fundraise',
+        'icon': Icons.rocket_launch_rounded,
+        'route': '/fundraising'
+      },
     ];
 
     return Container(
@@ -533,13 +584,14 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
                           ? AppTheme.gold
                           : AppTheme.navyDeep),
                   const SizedBox(height: 6),
-                  Text(a['label'] as String, style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? AppTheme.textOnDark
-                        : AppTheme.textPrimary,
-                  )),
+                  Text(a['label'] as String,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppTheme.textOnDark
+                            : AppTheme.onSurfaceText(context),
+                      )),
                 ],
               ),
             ),
@@ -571,12 +623,13 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('TREND', style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.2,
-                color: AppTheme.textSecondary,
-              )),
+              Text('TREND',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 1.2,
+                    color: AppTheme.onSurfaceTextSecondary(context),
+                  )),
               Row(children: [
                 _legendDot(AppTheme.emerald, 'Revenue'),
                 const SizedBox(width: 12),
@@ -598,18 +651,19 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
               ),
               child: Row(
                 children: [
-                  const Text('M', style: TextStyle(
-                    color: AppTheme.gold,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                  )),
+                  const Text('M',
+                      style: TextStyle(
+                        color: AppTheme.gold,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w800,
+                      )),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       _getMadiChartComment(_selectedMonth!),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppTheme.textPrimary,
+                        color: AppTheme.onSurfaceText(context),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -631,19 +685,33 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
                   ),
                 ),
                 titlesData: FlTitlesData(
-                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false)),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
                       getTitlesWidget: (value, _) {
-                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+                        const months = [
+                          'Jan',
+                          'Feb',
+                          'Mar',
+                          'Apr',
+                          'May',
+                          'Jun'
+                        ];
                         final i = value.toInt();
-                        if (i < 0 || i >= months.length) return const SizedBox();
-                        return Text(months[i], style: const TextStyle(
-                          fontSize: 10, color: AppTheme.textMuted,
-                        ));
+                        if (i < 0 || i >= months.length) {
+                          return const SizedBox();
+                        }
+                        return Text(months[i],
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: AppTheme.onSurfaceTextMuted(context),
+                            ));
                       },
                     ),
                   ),
@@ -651,21 +719,24 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
                 borderData: FlBorderData(show: false),
                 lineTouchData: LineTouchData(
                   touchCallback: (event, response) {
-                    if (event is FlTapUpEvent && response?.lineBarSpots != null) {
+                    if (event is FlTapUpEvent &&
+                        response?.lineBarSpots != null) {
                       setState(() {
                         _selectedMonth = response!.lineBarSpots![0].x.toInt();
                       });
                     }
                   },
                   touchTooltipData: LineTouchTooltipData(
-                    getTooltipItems: (spots) => spots.map((s) => LineTooltipItem(
-                      '\u20B9${(s.y / 1000).toStringAsFixed(0)}K',
-                      TextStyle(
-                        color: s.bar.color,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12,
-                      ),
-                    )).toList(),
+                    getTooltipItems: (spots) => spots
+                        .map((s) => LineTooltipItem(
+                              '\u20B9${(s.y / 1000).toStringAsFixed(0)}K',
+                              TextStyle(
+                                color: s.bar.color,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
+                              ),
+                            ))
+                        .toList(),
                   ),
                 ),
                 lineBarsData: [
@@ -719,13 +790,16 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
   Widget _legendDot(Color color, String label) {
     return Row(children: [
       Container(
-        width: 8, height: 8,
+        width: 8,
+        height: 8,
         decoration: BoxDecoration(color: color, shape: BoxShape.circle),
       ),
       const SizedBox(width: 4),
-      Text(label, style: const TextStyle(
-        fontSize: 11, color: AppTheme.textSecondary,
-      )),
+      Text(label,
+          style: TextStyle(
+            fontSize: 11,
+            color: AppTheme.onSurfaceTextSecondary(context),
+          )),
     ]);
   }
 
@@ -735,14 +809,15 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(bottom: 12),
-            child: Text('RECENT TRANSACTIONS', style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
-              color: AppTheme.textSecondary,
-            )),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text('RECENT TRANSACTIONS',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.2,
+                  color: AppTheme.onSurfaceTextSecondary(context),
+                )),
           ),
           ...transactions.map((t) {
             final isIncome = t.type == 'income';
@@ -764,13 +839,17 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
               child: Row(
                 children: [
                   Container(
-                    width: 36, height: 36,
+                    width: 36,
+                    height: 36,
                     decoration: BoxDecoration(
-                      color: (isIncome ? AppTheme.emerald : AppTheme.coral).withValues(alpha: 0.1),
+                      color: (isIncome ? AppTheme.emerald : AppTheme.coral)
+                          .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
-                      isIncome ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+                      isIncome
+                          ? Icons.arrow_upward_rounded
+                          : Icons.arrow_downward_rounded,
                       color: isIncome ? AppTheme.emerald : AppTheme.coral,
                       size: 18,
                     ),
@@ -780,16 +859,18 @@ class _FounderDashboardScreenState extends ConsumerState<FounderDashboardScreen>
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(t.description, style: const TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 13,
-                          color: AppTheme.textPrimary,
-                        )),
+                        Text(t.description,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 13,
+                              color: AppTheme.onSurfaceText(context),
+                            )),
                         const SizedBox(height: 2),
-                        Text('${t.date} \u00B7 ${t.category}', style: const TextStyle(
-                          fontSize: 11,
-                          color: AppTheme.textSecondary,
-                        )),
+                        Text('${t.date} \u00B7 ${t.category}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: AppTheme.onSurfaceTextSecondary(context),
+                            )),
                       ],
                     ),
                   ),

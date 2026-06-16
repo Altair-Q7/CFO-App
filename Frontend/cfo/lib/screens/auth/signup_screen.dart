@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/constants/app_constants.dart';
 import '../../providers/providers.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
@@ -27,37 +28,164 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     }
   }
 
+  InputDecoration _inputDecoration(String label, IconData icon, {required bool isDark}) {
+    final fillCol = isDark ? AppTheme.darkElevated : AppTheme.lightElevated;
+    final borderCol = isDark ? AppTheme.darkBorder : AppTheme.lightBorder;
+    final labelCol = isDark ? AppTheme.textOnDarkMuted : AppTheme.onSurfaceTextSecondary(context);
+    return InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color: labelCol, fontSize: 14),
+      prefixIcon: Icon(icon, color: labelCol, size: 20),
+      filled: true,
+      fillColor: fillCol,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: borderCol),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: borderCol),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppTheme.gold, width: 1.5),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _emailCtrl.dispose();
+    _passCtrl.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final currentTheme = ref.watch(themeProvider);
+    final isDark = currentTheme == ThemeMode.dark ||
+        (currentTheme == ThemeMode.system &&
+            MediaQuery.of(context).platformBrightness == Brightness.dark);
+
+    final bg = isDark ? AppTheme.darkBase : AppTheme.lightBase;
+    final textPrimary = isDark ? AppTheme.textOnDark : AppTheme.onSurfaceText(context);
+    final textSecondary = isDark ? AppTheme.textOnDarkMuted : AppTheme.onSurfaceTextSecondary(context);
+    final cardBg = isDark ? AppTheme.darkElevated : AppTheme.lightSurface;
+    final borderCol = isDark ? AppTheme.darkBorder : AppTheme.lightBorder;
+
     return Scaffold(
-      body: Center(
+      backgroundColor: bg,
+      appBar: AppBar(
+        backgroundColor: isDark ? AppTheme.navyDeep : AppTheme.surfaceColor(context),
+        foregroundColor: isDark ? AppTheme.textOnDark : AppTheme.onSurfaceText(context),
+        elevation: 0,
+        centerTitle: true,
+        title: const Text('Create Account'),
+      ),
+      body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.person_add, size: 64, color: Color(0xFF0B1F3A)),
               const SizedBox(height: 16),
-              const Text('Create Account', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 32),
-              TextField(controller: _nameCtrl, decoration: const InputDecoration(labelText: 'Full Name', border: OutlineInputBorder())),
-              const SizedBox(height: 16),
-              TextField(controller: _emailCtrl, keyboardType: TextInputType.emailAddress, decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder())),
-              const SizedBox(height: 16),
-              TextField(controller: _passCtrl, obscureText: true, decoration: const InputDecoration(labelText: 'Password', border: OutlineInputBorder())),
-              const SizedBox(height: 8),
-              if (_error != null) Text(_error!, style: const TextStyle(color: Colors.red)),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity, height: 48,
-                child: ElevatedButton(
-                  onPressed: _loading ? null : _signup,
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0B1F3A), foregroundColor: Colors.white),
-                  child: _loading ? const CircularProgressIndicator(color: Colors.white) : const Text('Sign Up'),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: cardBg,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: borderCol),
+                ),
+                child: Column(
+                  children: [
+                    Icon(Icons.person_add, size: 64, color: AppTheme.iconOnSurface(context)),
+                    const SizedBox(height: 16),
+                    Text('Create your account', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textPrimary)),
+                    const SizedBox(height: 8),
+                    Text('Fill in the details to get started', style: TextStyle(fontSize: 13, color: textSecondary)),
+                    const SizedBox(height: 32),
+                    TextField(
+                      controller: _nameCtrl,
+                      style: TextStyle(color: textPrimary),
+                      decoration: _inputDecoration('Full Name', Icons.person_outlined, isDark: isDark),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _emailCtrl,
+                      keyboardType: TextInputType.emailAddress,
+                      style: TextStyle(color: textPrimary),
+                      decoration: _inputDecoration('Email', Icons.email_outlined, isDark: isDark),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _passCtrl,
+                      obscureText: true,
+                      style: TextStyle(color: textPrimary),
+                      decoration: _inputDecoration('Password', Icons.lock_outlined, isDark: isDark),
+                    ),
+                    const SizedBox(height: 8),
+                    if (_error != null) ...[
+                      const SizedBox(height: 8),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppTheme.coral.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: AppTheme.coral.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.error_outline,
+                                color: AppTheme.coral, size: 16),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(_error!, style: const TextStyle(
+                                color: AppTheme.coral, fontSize: 13,
+                              )),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 24),
+                    SizedBox(
+                      width: double.infinity, height: 50,
+                      child: ElevatedButton(
+                        onPressed: _loading ? null : _signup,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.navyMid,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: _loading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white,
+                                ),
+                              )
+                            : const Text('Sign Up'),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 16),
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text('Already have an account? Login')),
+              const SizedBox(height: 20),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                  'Already have an account? Login',
+                  style: TextStyle(color: textSecondary),
+                ),
+              ),
             ],
           ),
         ),

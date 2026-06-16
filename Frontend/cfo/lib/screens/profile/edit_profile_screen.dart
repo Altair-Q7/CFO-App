@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/constants/app_constants.dart';
 import '../../providers/providers.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
@@ -22,7 +23,23 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(profileProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Profile')),
+      backgroundColor: AppTheme.baseColor(context),
+      appBar: AppBar(
+        backgroundColor: AppTheme.surfaceColor(context),
+        elevation: 0,
+        scrolledUnderElevation: 1,
+        title: Text('Edit Profile',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: AppTheme.onSurfaceText(context),
+            )),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_rounded,
+              color: AppTheme.onSurfaceText(context)),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: profileAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
@@ -58,8 +75,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   width: double.infinity, height: 48,
                   child: ElevatedButton(
                     onPressed: _loading ? null : _save,
-                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0B1F3A), foregroundColor: Colors.white),
-                    child: _loading ? const CircularProgressIndicator(color: Colors.white) : const Text('Save Changes'),
+                    child: _loading ? const CircularProgressIndicator(color: AppTheme.textOnDark) : const Text('Save Changes'),
                   ),
                 ),
               ],

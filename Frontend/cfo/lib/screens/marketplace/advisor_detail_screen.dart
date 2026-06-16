@@ -14,8 +14,9 @@ class AdvisorDetailScreen extends ConsumerWidget {
         future:
             ref.read(marketplaceServiceProvider).getAdvisorDetail(advisorId),
         builder: (ctx, snap) {
-          if (snap.connectionState == ConnectionState.waiting)
+          if (snap.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
+          }
           if (snap.hasError) return Center(child: Text('Error: ${snap.error}'));
           final advisor = snap.data!['advisor'] as AdvisorModel;
           final reviews = snap.data!['reviews'] as List<ReviewModel>;

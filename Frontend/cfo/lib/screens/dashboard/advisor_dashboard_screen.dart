@@ -1,45 +1,56 @@
+// =============================================================================
+// AdvisorDashboardScreen — MADI Advisor Client Hub
+// =============================================================================
+// Advisor view showing:
+//   - MADI Briefing card (navy gradient with client portfolio overview)
+//   - 3-column KPI row (Active Clients, Upcoming, Rating)
+//   - Upcoming Bookings list with client details
+//   - Client Health list with runway-based status (Healthy/Watch/Critical)
+//   - Recent Activity log
+// =============================================================================
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_constants.dart';
 import '../../services/mock_data_service.dart';
+import '../../widgets/madi_presence_indicator.dart';
 
-class AdvisorDashboardScreen extends StatefulWidget {
+class AdvisorDashboardScreen extends ConsumerStatefulWidget {
   const AdvisorDashboardScreen({super.key});
 
   @override
-  State<AdvisorDashboardScreen> createState() => _AdvisorDashboardScreenState();
+  ConsumerState<AdvisorDashboardScreen> createState() =>
+      _AdvisorDashboardScreenState();
 }
 
-class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
+class _AdvisorDashboardScreenState
+    extends ConsumerState<AdvisorDashboardScreen> {
   @override
   Widget build(BuildContext context) {
+    // Fetch mock advisor metrics
     final data = MockDataService().getMockAdvisorMetrics();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       backgroundColor: AppTheme.baseColor(context),
+      // AppBar with MADI presence, rating badge, and logout button
       appBar: AppBar(
-        title: Text(data['advisorName'] ?? 'Advisor'),
+        backgroundColor:
+            isDark ? AppTheme.navyDeep : AppTheme.surfaceColor(context),
+        elevation: 0,
+        scrolledUnderElevation: 1,
+        title: Text(data['advisorName'] ?? 'Advisor Dashboard',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: isDark
+                  ? AppTheme.textOnDark
+                  : AppTheme.onSurfaceText(context),
+            )),
         actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 12),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: AppTheme.accentGold.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.star_rounded,
-                    color: AppTheme.accentGold, size: 14),
-                const SizedBox(width: 4),
-                Text('${data['rating']}',
-                    style: const TextStyle(
-                        color: AppTheme.accentGold,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600)),
-              ],
-            ),
-          ),
+          const MadiPresenceIndicator(),
+          const SizedBox(width: 4),
+          _ratingBadge(data),
         ],
       ),
       body: SafeArea(
@@ -48,7 +59,7 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              _buildHeader(data),
+              _buildMadiBriefing(),
               const SizedBox(height: 16),
               _buildKpiRow(data),
               const SizedBox(height: 20),
@@ -64,7 +75,7 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
               _buildSectionTitle('Recent Activity', Icons.history_rounded),
               const SizedBox(height: 12),
               _buildRecentActivity(data),
-              const SizedBox(height: 20),
+              const SizedBox(height: 100),
             ],
           ),
         ),
@@ -72,13 +83,126 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
     );
   }
 
+  /// Gold-accented rating badge shown in AppBar
+  Widget _ratingBadge(Map<String, dynamic> data) {
+    return Container(
+      margin: const EdgeInsets.only(right: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: AppTheme.gold.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppTheme.gold.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.star_rounded, color: AppTheme.gold, size: 14),
+          const SizedBox(width: 4),
+          Text('${data['rating']}',
+              style: const TextStyle(
+                  color: AppTheme.gold,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
+
+  /// MADI briefing card — navy gradient with portfolio overview
+  Widget _buildMadiBriefing() {
+    final madiData = MockDataService().getMadiBriefingHealthy();
+    final sentences = madiData['sentences'] as List<String>;
+    final status = madiData['healthStatus'] as String? ?? 'healthy';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 4),
+      decoration: BoxDecoration(
+        gradient: AppTheme.navyGradient,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.navyDeep.withValues(alpha: 0.3),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            // Gold "M" icon
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: AppTheme.gold.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Center(
+                  child: Text('M',
+                      style: TextStyle(
+                        color: AppTheme.gold,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ))),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Client Portfolio Overview',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      )),
+                  const SizedBox(height: 2),
+                  Text(
+                      sentences.isNotEmpty
+                          ? sentences.first
+                          : 'All clients monitored',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.7),
+                        fontSize: 12,
+                      )),
+                ],
+              ),
+            ),
+            // Status badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppTheme.emerald.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(6),
+                border:
+                    Border.all(color: AppTheme.emerald.withValues(alpha: 0.3)),
+              ),
+              child: Text(status.toUpperCase(),
+                  style: TextStyle(
+                    color: AppTheme.emerald,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.0,
+                  )),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Section title with icon — follows MADI gold accent in dark mode
   Widget _buildSectionTitle(String title, IconData icon) {
     return Row(
       children: [
-        Icon(icon, size: 18,
+        Icon(icon,
+            size: 18,
             color: Theme.of(context).brightness == Brightness.dark
                 ? AppTheme.gold
-                : AppTheme.primary),
+                : AppTheme.navyDeep),
         const SizedBox(width: 8),
         Text(title,
             style: TextStyle(
@@ -86,79 +210,28 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).brightness == Brightness.dark
                     ? AppTheme.textOnDark
-                    : AppTheme.textPrimary)),
+                    : AppTheme.onSurfaceText(context))),
       ],
     );
   }
 
-  Widget _buildHeader(Map<String, dynamic> data) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: AppTheme.primaryGradient,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.primary.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 50,
-            height: 50,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.white.withOpacity(0.2),
-            ),
-            child:
-                const Icon(Icons.person_rounded, color: Colors.white, size: 26),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Advisor Dashboard',
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white)),
-                const SizedBox(height: 4),
-                Text(data['specialization'] ?? '',
-                    style: TextStyle(
-                        fontSize: 13, color: Colors.white.withOpacity(0.7))),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
+  /// Three KPI cards: Active Clients, Upcoming, Rating
   Widget _buildKpiRow(Map<String, dynamic> data) {
     return Row(
       children: [
-        _kpiCard(
-          'Active Clients',
-          '${data['activeEngagements']}',
-          Icons.people_rounded,
-          AppTheme.iconOnSurface(context),
-        ),
+        _kpiCard('Active Clients', '${data['activeEngagements']}',
+            Icons.people_rounded, AppTheme.emerald),
+        const SizedBox(width: 10),
+        _kpiCard('Upcoming', '${(data['upcomingBookings'] as List).length}',
+            Icons.event_rounded, AppTheme.amber),
         const SizedBox(width: 10),
         _kpiCard(
-          'Upcoming',
-          '${(data['upcomingBookings'] as List).length}',
-          Icons.event_rounded,
-          AppTheme.info,
-        ),
+            'Rating', '${data['rating']}', Icons.star_rounded, AppTheme.gold),
       ],
     );
   }
 
+  /// Individual KPI card with icon, value, label
   Widget _kpiCard(String label, String value, IconData icon, Color color) {
     return Expanded(
       child: Container(
@@ -191,7 +264,8 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
             const SizedBox(height: 2),
             Text(label,
                 style: TextStyle(
-                    fontSize: 11, color: AppTheme.onSurfaceTextSecondary(context)),
+                    fontSize: 11,
+                    color: AppTheme.onSurfaceTextSecondary(context)),
                 textAlign: TextAlign.center),
           ],
         ),
@@ -199,6 +273,7 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
     );
   }
 
+  /// Upcoming bookings list with client name, date, time, topic
   Widget _buildBookings(Map<String, dynamic> data) {
     final bookings = data['upcomingBookings'] as List;
     return Column(
@@ -209,7 +284,8 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
           decoration: BoxDecoration(
             color: AppTheme.surfaceColor(context),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppTheme.borderColor(context), width: 0.5),
+            border:
+                Border.all(color: AppTheme.borderColor(context), width: 0.5),
             boxShadow: [
               BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -223,11 +299,16 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: AppTheme.iconOnSurface(context).withValues(alpha: 0.1),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppTheme.gold.withValues(alpha: 0.15)
+                      : AppTheme.navyDeep.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(Icons.event_rounded,
-                    color: AppTheme.iconOnSurface(context), size: 22),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppTheme.gold
+                        : AppTheme.navyDeep,
+                    size: 22),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -240,13 +321,15 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
                             fontWeight: FontWeight.w600,
                             color: AppTheme.onSurfaceText(context))),
                     const SizedBox(height: 2),
-                    Text('${b['date']} · ${b['time']}',
+                    Text('${b['date']} \u00B7 ${b['time']}',
                         style: TextStyle(
-                            fontSize: 12, color: AppTheme.onSurfaceTextSecondary(context))),
+                            fontSize: 12,
+                            color: AppTheme.onSurfaceTextSecondary(context))),
                     const SizedBox(height: 2),
                     Text('Topic: ${b['topic']}',
                         style: TextStyle(
-                            fontSize: 11, color: AppTheme.onSurfaceTextSecondary(context))),
+                            fontSize: 11,
+                            color: AppTheme.onSurfaceTextSecondary(context))),
                   ],
                 ),
               ),
@@ -257,6 +340,7 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
     );
   }
 
+  /// Client health cards with status color based on runway remaining
   Widget _buildClientHealth(Map<String, dynamic> data) {
     final health = data['clientHealth'] as List;
     return Column(
@@ -265,13 +349,13 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
         String statusLabel;
         final runway = c['runway'] as int;
         if (runway >= 12) {
-          statusColor = AppTheme.success;
+          statusColor = AppTheme.emerald;
           statusLabel = 'Healthy';
         } else if (runway >= 6) {
-          statusColor = AppTheme.warning;
+          statusColor = AppTheme.amber;
           statusLabel = 'Watch';
         } else {
-          statusColor = AppTheme.error;
+          statusColor = AppTheme.coral;
           statusLabel = 'Critical';
         }
         return Container(
@@ -280,7 +364,8 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
           decoration: BoxDecoration(
             color: AppTheme.surfaceColor(context),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppTheme.borderColor(context), width: 0.5),
+            border:
+                Border.all(color: AppTheme.borderColor(context), width: 0.5),
             boxShadow: [
               BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -294,7 +379,7 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
+                  color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
@@ -320,7 +405,8 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
                     const SizedBox(height: 2),
                     Text('$runway months runway',
                         style: TextStyle(
-                            fontSize: 11, color: AppTheme.onSurfaceTextSecondary(context))),
+                            fontSize: 11,
+                            color: AppTheme.onSurfaceTextSecondary(context))),
                   ],
                 ),
               ),
@@ -328,7 +414,7 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
+                  color: statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(statusLabel,
@@ -344,6 +430,7 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
     );
   }
 
+  /// Recent activity list with client and action description
   Widget _buildRecentActivity(Map<String, dynamic> data) {
     final activities = data['recentActivity'] as List;
     return Column(
@@ -354,7 +441,8 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
           decoration: BoxDecoration(
             color: AppTheme.surfaceColor(context),
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppTheme.borderColor(context), width: 0.5),
+            border:
+                Border.all(color: AppTheme.borderColor(context), width: 0.5),
             boxShadow: [
               BoxShadow(
                   color: Colors.black.withValues(alpha: 0.04),
@@ -368,11 +456,16 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: AppTheme.info.withOpacity(0.08),
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? AppTheme.gold.withValues(alpha: 0.15)
+                      : AppTheme.navyMid.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(Icons.history_rounded,
-                    color: AppTheme.info, size: 20),
+                child: Icon(Icons.history_rounded,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppTheme.gold
+                        : AppTheme.navyMid,
+                    size: 20),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -385,9 +478,10 @@ class _AdvisorDashboardScreenState extends State<AdvisorDashboardScreen> {
                             fontWeight: FontWeight.w600,
                             color: AppTheme.onSurfaceText(context))),
                     const SizedBox(height: 2),
-                    Text('${a['action']} · ${a['daysAgo']} days ago',
+                    Text('${a['action']} \u00B7 ${a['daysAgo']} days ago',
                         style: TextStyle(
-                            fontSize: 11, color: AppTheme.onSurfaceTextSecondary(context))),
+                            fontSize: 11,
+                            color: AppTheme.onSurfaceTextSecondary(context))),
                   ],
                 ),
               ),

@@ -63,19 +63,33 @@ class AppTheme {
 
   // Theme-aware helpers — call on BuildContext to get dark/light variant
   static Color surfaceColor(BuildContext context) =>
-    Theme.of(context).brightness == Brightness.dark ? darkSurface : lightSurface;
+      Theme.of(context).brightness == Brightness.dark
+          ? darkSurface
+          : lightSurface;
   static Color baseColor(BuildContext context) =>
-    Theme.of(context).brightness == Brightness.dark ? darkBase : lightBase;
+      Theme.of(context).brightness == Brightness.dark ? darkBase : lightBase;
   static Color elevatedColor(BuildContext context) =>
-    Theme.of(context).brightness == Brightness.dark ? darkElevated : lightElevated;
+      Theme.of(context).brightness == Brightness.dark
+          ? darkElevated
+          : lightElevated;
   static Color borderColor(BuildContext context) =>
-    Theme.of(context).brightness == Brightness.dark ? darkBorder : lightBorder;
+      Theme.of(context).brightness == Brightness.dark
+          ? darkBorder
+          : lightBorder;
   static Color onSurfaceText(BuildContext context) =>
-    Theme.of(context).brightness == Brightness.dark ? textOnDark : textPrimary;
+      Theme.of(context).brightness == Brightness.dark
+          ? textOnDark
+          : textPrimary;
   static Color onSurfaceTextSecondary(BuildContext context) =>
-    Theme.of(context).brightness == Brightness.dark ? textOnDarkMuted : textSecondary;
+      Theme.of(context).brightness == Brightness.dark
+          ? textOnDarkMuted
+          : textSecondary;
+  static Color onSurfaceTextMuted(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+          ? textOnDarkMuted
+          : textMuted;
   static Color iconOnSurface(BuildContext context) =>
-    Theme.of(context).brightness == Brightness.dark ? gold : navyDeep;
+      Theme.of(context).brightness == Brightness.dark ? gold : navyDeep;
 
   // === GRADIENTS ===
   static const LinearGradient navyGradient = LinearGradient(
